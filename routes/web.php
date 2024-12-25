@@ -51,29 +51,46 @@ use App\Http\Controllers\Admin\TagController;
 // Admin Routes
 Route::group([
     'prefix' => 'admin',
-    'middleware' => ['auth', 'admin'], 
+    'middleware' => ['auth', 'admin'],
     'as' => 'admin.'
 ], function () {
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     // Artists Management
-    Route::resource('artists', ArtistController::class);
+    Route::get('artists', [ArtistController::class, 'index'])->name('artists.index');
+    Route::get('artists/create', [ArtistController::class, 'create'])->name('artists.create');
+    Route::post('artists', [ArtistController::class, 'store'])->name('artists.store');
+    Route::get('artists/{artist}/edit', [ArtistController::class, 'edit'])->name('artists.edit');
+    Route::put('artists/{artist}', [ArtistController::class, 'update'])->name('artists.update');
+    Route::delete('artists/{artist}', [ArtistController::class, 'destroy'])->name('artists.destroy');
 
     // Artworks Management
-    Route::resource('artworks', ArtworkController::class);
-    Route::post('artworks/upload-image', [ArtworkController::class, 'uploadImage'])
-        ->name('artworks.upload-image');
-    Route::delete('artworks/remove-image/{image}', [ArtworkController::class, 'removeImage'])
-        ->name('artworks.remove-image');
+    Route::get('artworks', [ArtworkController::class, 'index'])->name('artworks.index');
+    Route::get('artworks/create', [ArtworkController::class, 'create'])->name('artworks.create');
+    Route::post('artworks', [ArtworkController::class, 'store'])->name('artworks.store');
+    Route::get('artworks/{artwork}/edit', [ArtworkController::class, 'edit'])->name('artworks.edit');
+    Route::put('artworks/{artwork}', [ArtworkController::class, 'update'])->name('artworks.update');
+    Route::delete('artworks/{artwork}', [ArtworkController::class, 'destroy'])->name('artworks.destroy');
+    Route::post('artworks/upload-image', [ArtworkController::class, 'uploadImage'])->name('artworks.upload-image');
+    Route::delete('artworks/remove-image/{image}', [ArtworkController::class, 'removeImage'])->name('artworks.remove-image');
 
     // Categories Management
-    Route::resource('categories', CategoryController::class);
-    Route::post('categories/reorder', [CategoryController::class, 'reorder'])
-        ->name('categories.reorder');
+    Route::get('categories', [CategoryController::class, 'index'])->name('categories.index');
+    Route::get('categories/create', [CategoryController::class, 'create'])->name('categories.create');
+    Route::post('categories', [CategoryController::class, 'store'])->name('categories.store');
+    Route::get('categories/{category}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
+    Route::put('categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+    Route::delete('categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+    Route::post('categories/reorder', [CategoryController::class, 'reorder'])->name('categories.reorder');
 
     // Tags Management
-    Route::resource('tags', TagController::class);
+    Route::get('tags', [TagController::class, 'index'])->name('tags.index');
+    Route::get('tags/create', [TagController::class, 'create'])->name('tags.create');
+    Route::post('tags', [TagController::class, 'store'])->name('tags.store');
+    Route::get('tags/{tag}/edit', [TagController::class, 'edit'])->name('tags.edit');
+    Route::put('tags/{tag}', [TagController::class, 'update'])->name('tags.update');
+    Route::delete('tags/{tag}', [TagController::class, 'destroy'])->name('tags.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

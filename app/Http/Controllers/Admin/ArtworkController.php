@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Artwork;
 use Illuminate\Http\Request;
 
 class ArtworkController extends Controller
@@ -12,9 +13,9 @@ class ArtworkController extends Controller
      */
     public function index()
     {
-        //
+        $artworks = Artwork::all();
+        return view('admin.artworks.index', compact('artworks'));
     }
-
     /**
      * Show the form for creating a new resource.
      */
