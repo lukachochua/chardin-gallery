@@ -1,33 +1,51 @@
 <x-layouts.admin>
-    <div class="container mx-auto px-4 py-8">
-        <h1 class="text-2xl font-semibold mb-6">Categories</h1>
-        
-        <a href="{{ route('admin.categories.create') }}" class="bg-blue-500 text-white px-4 py-2 rounded-md mb-6 inline-block">Add New Category</a>
-        
-        <div class="overflow-x-auto bg-white shadow-md rounded-lg">
-            <table class="min-w-full table-auto">
-                <thead>
-                    <tr class="bg-gray-100">
-                        <th class="px-4 py-2 text-left">Name</th>
-                        <th class="px-4 py-2 text-left">Actions</th>
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="px-6 py-4 flex justify-between items-center bg-gray-100 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-800">Categories</h2>
+            <a href="{{ route('admin.categories.create') }}"
+                class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium text-sm rounded">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Add New Category
+            </a>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="bg-white divide-y divide-gray-200">
                     @foreach ($categories as $category)
-                        <tr class="border-b">
-                            <td class="px-4 py-2">{{ $category->name }}</td>
-                            <td class="px-4 py-2">
-                                <a href="{{ route('admin.categories.edit', $category->id) }}" class="bg-yellow-500 text-white px-4 py-2 rounded-md">Edit</a>
-                                <form action="{{ route('admin.categories.destroy', $category->id) }}" method="POST" class="inline-block">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-md">Delete</button>
-                                </form>
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">{{ $category->name }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center space-x-2">
+                                    <a href="{{ route('admin.categories.edit', $category->id) }}"
+                                        class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                                    <form action="{{ route('admin.categories.destroy', $category->id) }}" method="POST"
+                                        class="inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-600 hover:text-red-900"
+                                            onclick="return confirm('Are you sure you want to delete this category?')">Delete</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @endforeach
                 </tbody>
             </table>
         </div>
+
     </div>
 </x-layouts.admin>
