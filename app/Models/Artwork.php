@@ -37,8 +37,15 @@ class Artwork extends Model
     protected static function boot()
     {
         parent::boot();
+
         static::creating(function ($artwork) {
             $artwork->slug = Str::slug($artwork->title);
+        });
+
+        static::updating(function ($artwork) {
+            if ($artwork->isDirty('title')) {
+                $artwork->slug = Str::slug($artwork->title);
+            }
         });
     }
 

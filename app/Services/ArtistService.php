@@ -6,6 +6,7 @@ use App\Models\Artist;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
+use Intervention\Image\ImageManager;
 
 class ArtistService
 {
@@ -35,17 +36,18 @@ class ArtistService
     private function handleProfileImage(UploadedFile $image)
     {
         $path = $image->store('artists', 'public');
-        
-        // Create optimized version
-        $optimizedImage = Image::make(Storage::disk('public')->path($path))
-            ->fit(800, 800, function ($constraint) {
-                $constraint->aspectRatio();
-                $constraint->upsize();
-            })
-            ->encode('jpg', 80);
-        
-        Storage::disk('public')->put($path, $optimizedImage);
-        
+        $fullPath = Storage::disk('public')->path($path);
+
+        $img = new ImageManager('imagick');
+        $image = $img->read($fullPath);
+
+        $image->resize(800, 800, function ($constraint) {
+            $constraint->aspectRatio();
+            $constraint->upsize();
+        });
+
+        $image->save($fullPath);
+
         return $path;
     }
 }

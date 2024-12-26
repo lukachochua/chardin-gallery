@@ -3,64 +3,102 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\ArtworkRequest;
 use App\Models\Artwork;
+use App\Models\Artist;
+use App\Models\Category;
+use App\Models\Tag;
+use App\Services\ArtworkService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ArtworkController extends Controller
 {
+    protected $artworkService;
+
+    public function __construct(ArtworkService $artworkService)
+    {
+        $this->artworkService = $artworkService;
+    }
+
     /**
-     * Display a listing of the resource.
+     * Display a listing of the artworks.
      */
     public function index()
     {
-        $artworks = Artwork::all();
+        // Get all artworks, maybe paginate them to avoid long lists
+        $artworks = Artwork::with('artist', 'categories', 'tags')->orderBy('created_at', 'desc')->paginate(10);
+
         return view('admin.artworks.index', compact('artworks'));
     }
+
     /**
-     * Show the form for creating a new resource.
+     * Show the form for creating a new artwork.
      */
     public function create()
     {
-        //
+        // Get all needed data for the form
+        $artists = Artist::active()->orderBy('name')->get();
+        $categories = Category::orderBy('name')->get();
+        $tags = Tag::orderBy('name')->get();
+
+        return view('admin.artworks.create', compact('artists', 'categories', 'tags'));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created artwork in storage.
      */
-    public function store(Request $request)
+    public function store(ArtworkRequest $request)
     {
-        //
+        $this->artworkService->create($request->validated());
+
+        return redirect()
+            ->route('admin.artworks.index')
+            ->with('success', 'Artwork created successfully.');
     }
 
     /**
-     * Display the specified resource.
+     * Show the form for editing the specified artwork.
      */
-    public function show(string $id)
+    public function edit(Artwork $artwork)
     {
-        //
+        // Get all needed data for the form
+        $artists = Artist::active()->orderBy('name')->get();
+        $categories = Category::orderBy('name')->get();
+        $tags = Tag::orderBy('name')->get();
+
+        return view('admin.artworks.edit', compact('artwork', 'artists', 'categories', 'tags'));
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Update the specified artwork in storage.
      */
-    public function edit(string $id)
+    public function update(ArtworkRequest $request, Artwork $artwork)
     {
-        //
+        // Use the service method to handle the update logic
+
+        $this->artworkService->update($artwork, $request->validated());
+
+        return redirect()
+            ->route('admin.artworks.index')
+            ->with('success', 'Artwork updated successfully.');
     }
 
     /**
-     * Update the specified resource in storage.
+     * Remove the specified artwork from storage.
      */
-    public function update(Request $request, string $id)
+    public function destroy(Artwork $artwork)
     {
-        //
-    }
+        // Delete the artwork's image if it exists
+        if ($artwork->image) {
+            Storage::disk('public')->delete($artwork->image);
+        }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        // Delete the artwork
+        $artwork->delete();
+
+        return redirect()
+            ->route('admin.artworks.index')
+            ->with('success', 'Artwork deleted successfully.');
     }
 }

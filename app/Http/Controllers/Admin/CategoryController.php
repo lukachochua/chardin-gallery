@@ -3,11 +3,20 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\CategoryRequest;
 use App\Models\Category;
+use App\Services\CategoryService;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
+    protected $categoryService;
+
+    public function __construct(CategoryService $categoryService)
+    {
+        $this->categoryService = $categoryService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -22,15 +31,19 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        //
+        $categories = Category::all();
+        return view('admin.categories.create', compact('categories'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CategoryRequest $request)
     {
-        //
+        $this->categoryService->create($request->validated());
+        return redirect()
+            ->route('admin.categories.index')
+            ->with('success', 'Category created successfully.');
     }
 
     /**
@@ -38,7 +51,8 @@ class CategoryController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $category = Category::findOrFail($id);
+        return view('admin.categories.show', compact('category'));
     }
 
     /**
@@ -46,15 +60,21 @@ class CategoryController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $category = Category::findOrFail($id);
+        $categories = Category::all(); // Fetch all categories for the parent selection
+        return view('admin.categories.edit', compact('category', 'categories'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(CategoryRequest $request, string $id)
     {
-        //
+        $category = Category::findOrFail($id);
+        $this->categoryService->update($category, $request->validated());
+        return redirect()
+            ->route('admin.categories.index')
+            ->with('success', 'Category updated successfully.');
     }
 
     /**
@@ -62,6 +82,10 @@ class CategoryController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $category = Category::findOrFail($id);
+        $this->categoryService->delete($category);
+        return redirect()
+            ->route('admin.categories.index')
+            ->with('success', 'Category deleted successfully.');
     }
 }
