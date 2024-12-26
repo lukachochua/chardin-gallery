@@ -22,7 +22,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::all();
+        $categories = Category::defaultOrder()->get();
         return view('admin.categories.index', compact('categories'));
     }
 
@@ -31,19 +31,25 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        $categories = Category::all();
-        return view('admin.categories.create', compact('categories'));
+        $rootCategories = Category::whereIsRoot()->with('children')->get();
+        return view('admin.categories.create', compact('rootCategories'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CategoryRequest $request)
+    public function store(Request $request)
     {
-        $this->categoryService->create($request->validated());
-        return redirect()
-            ->route('admin.categories.index')
-            ->with('success', 'Category created successfully.');
+        $validated = $request->validate([
+            'name' => 'required|max:255',
+            'description' => 'nullable',
+            'parent_id' => 'nullable|exists:categories,id'
+        ]);
+
+        $category = $this->categoryService->create($validated);
+
+        return redirect()->route('admin.categories.index')
+            ->with('success', 'Category created successfully');
     }
 
     /**
