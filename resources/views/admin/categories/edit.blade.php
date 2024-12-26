@@ -41,7 +41,16 @@
                 @enderror
             </div>
 
-            <button type="submit" class="bg-yellow-500 text-white px-4 py-2 rounded-md">Update Category</button>
+            <div class="flex justify-end">
+                <button type="submit"
+                    class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium text-sm rounded-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Update Category
+                </button>
+            </div>
         </form>
     </div>
 </x-layouts.admin>

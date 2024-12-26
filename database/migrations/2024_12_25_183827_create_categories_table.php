@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('slug')->unique();
             $table->text('description')->nullable();
-            $table->nestedSet(); // This adds parent_id, lft, rgt, and depth columns for nested categories
+            $table->nestedSet(); 
             $table->timestamps();
         });
     }

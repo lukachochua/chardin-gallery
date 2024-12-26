@@ -1,12 +1,12 @@
 <?php
 
-namespace App\View\Components\admin;
+namespace App\View\Components\Form;
 
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class table.blade extends Component
+class Checkbox extends Component
 {
     /**
      * Create a new component instance.
@@ -21,6 +21,6 @@ class table.blade extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.admin.table.blade.php');
+        return view('components.form.checkbox');
     }
 }
