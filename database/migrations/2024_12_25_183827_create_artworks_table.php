@@ -24,6 +24,7 @@ return new class extends Migration
             $table->boolean('is_available')->default(true);
             $table->boolean('is_featured')->default(false);
             $table->integer('stock')->default(1);
+            $table->string('image')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

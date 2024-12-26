@@ -38,7 +38,7 @@ class ArtistService
         $path = $image->store('artists', 'public');
         $fullPath = Storage::disk('public')->path($path);
 
-        $img = new ImageManager('imagick');
+        $img = new ImageManager('gd');
         $image = $img->read($fullPath);
 
         $image->resize(800, 800, function ($constraint) {

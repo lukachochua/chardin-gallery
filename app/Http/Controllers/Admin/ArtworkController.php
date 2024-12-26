@@ -9,7 +9,6 @@ use App\Models\Artist;
 use App\Models\Category;
 use App\Models\Tag;
 use App\Services\ArtworkService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class ArtworkController extends Controller
@@ -26,9 +25,7 @@ class ArtworkController extends Controller
      */
     public function index()
     {
-        // Get all artworks, maybe paginate them to avoid long lists
         $artworks = Artwork::with('artist', 'categories', 'tags')->orderBy('created_at', 'desc')->paginate(10);
-
         return view('admin.artworks.index', compact('artworks'));
     }
 
@@ -37,7 +34,6 @@ class ArtworkController extends Controller
      */
     public function create()
     {
-        // Get all needed data for the form
         $artists = Artist::active()->orderBy('name')->get();
         $categories = Category::orderBy('name')->get();
         $tags = Tag::orderBy('name')->get();
@@ -52,9 +48,7 @@ class ArtworkController extends Controller
     {
         $this->artworkService->create($request->validated());
 
-        return redirect()
-            ->route('admin.artworks.index')
-            ->with('success', 'Artwork created successfully.');
+        return redirect()->route('admin.artworks.index')->with('success', 'Artwork created successfully.');
     }
 
     /**
@@ -62,7 +56,6 @@ class ArtworkController extends Controller
      */
     public function edit(Artwork $artwork)
     {
-        // Get all needed data for the form
         $artists = Artist::active()->orderBy('name')->get();
         $categories = Category::orderBy('name')->get();
         $tags = Tag::orderBy('name')->get();
@@ -73,15 +66,16 @@ class ArtworkController extends Controller
     /**
      * Update the specified artwork in storage.
      */
-    public function update(ArtworkRequest $request, Artwork $artwork)
+    public function update(ArtworkRequest $request, $id)
     {
-        // Use the service method to handle the update logic
+        // Find the artwork by ID
+        $artwork = Artwork::findOrFail($id);
 
-        $this->artworkService->update($artwork, $request->validated());
+        // Call the service to handle the update
+        $updatedArtwork = $this->artworkService->update($artwork, $request->validated());
 
-        return redirect()
-            ->route('admin.artworks.index')
-            ->with('success', 'Artwork updated successfully.');
+        // Redirect with success message
+        return redirect()->route('admin.artworks.index')->with('success', 'Artwork updated successfully!');
     }
 
     /**
@@ -89,16 +83,12 @@ class ArtworkController extends Controller
      */
     public function destroy(Artwork $artwork)
     {
-        // Delete the artwork's image if it exists
         if ($artwork->image) {
             Storage::disk('public')->delete($artwork->image);
         }
 
-        // Delete the artwork
         $artwork->delete();
 
-        return redirect()
-            ->route('admin.artworks.index')
-            ->with('success', 'Artwork deleted successfully.');
+        return redirect()->route('admin.artworks.index')->with('success', 'Artwork deleted successfully.');
     }
 }

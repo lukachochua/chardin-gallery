@@ -163,12 +163,18 @@
             <!-- Image -->
             <div class="mb-4">
                 <label for="image" class="block text-sm font-medium text-gray-700">Artwork Image</label>
+                @if ($artwork->image)
+                    <div class="mb-2">
+                        <img src="{{ asset('storage/' . $artwork->image) }}" alt="Current Image" class="max-w-xs">
+                    </div>
+                @endif
                 <input type="file" name="image" id="image"
                     class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                 @error('image')
                     <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
                 @enderror
             </div>
+
 
             <div class="flex justify-end">
                 <button type="submit" class="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600">Update

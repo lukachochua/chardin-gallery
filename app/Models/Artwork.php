@@ -22,7 +22,8 @@ class Artwork extends Model
         'year_created',
         'is_available',
         'is_featured',
-        'stock'
+        'stock',
+        'image'
     ];
 
     protected $casts = [
