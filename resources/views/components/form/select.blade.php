@@ -15,7 +15,8 @@
         class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         {{ $multiple ? 'multiple' : '' }} {{ $attributes }}>
         @foreach ($options as $key => $value)
-            <option value="{{ $key }}" {{ in_array($key, old($name, (array) $selected)) ? 'selected' : '' }}>
+            <option value="{{ $key }}"
+                {{ in_array($key, (array) old($name, (array) $selected)) ? 'selected' : '' }}>
                 {{ $value }}
             </option>
         @endforeach
