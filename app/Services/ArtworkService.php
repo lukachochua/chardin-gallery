@@ -18,8 +18,8 @@ class ArtworkService
 
         if (isset($data['category_id'])) {
             $artwork->categories()->attach($data['category_id']);
-        } elseif (isset($data['parent_category_id'])) {
-            $artwork->categories()->attach($data['parent_category_id']);
+        } elseif (isset($data['parent_id'])) {
+            $artwork->categories()->attach($data['parent_id']);
         }
 
         if (isset($data['tags'])) {
@@ -37,31 +37,46 @@ class ArtworkService
      */
     public function update(Artwork $artwork, array $data)
     {
+        Log::info('Service data before processing:', $data);
+
         if (isset($data['image'])) {
             if ($artwork->image) {
                 Storage::disk('public')->delete($artwork->image);
             }
-
             $imagePath = $data['image']->store('artworks', 'public');
             $data['image'] = $imagePath;
         }
 
-        $artwork->fill($data);
+        // Handle boolean fields
+        $data['is_available'] = isset($data['is_available']) && $data['is_available'] == 1;
+        $data['is_featured'] = isset($data['is_featured']) && $data['is_featured'] == 1;
+
         $artwork->update($data);
+
+        // Handle categories
         if (isset($data['category_id'])) {
             $artwork->categories()->sync([$data['category_id']]);
         } elseif (isset($data['parent_id'])) {
             $artwork->categories()->sync([$data['parent_id']]);
         }
 
+        // Handle tags
         if (isset($data['tags'])) {
-            $tags = is_array($data['tags']) ? array_map('intval', $data['tags']) : [];
-            $artwork->tags()->sync($tags);
+            // Ensure we have an array of valid tag IDs
+            $tagIds = collect($data['tags'])
+                ->filter()
+                ->map(fn($id) => (int)$id)
+                ->filter(fn($id) => $id > 0)
+                ->values()
+                ->toArray();
+
+            Log::info('Tag IDs to sync:', $tagIds);
+            $artwork->tags()->sync($tagIds);
         } else {
             $artwork->tags()->sync([]);
         }
 
-        return $artwork;
+        return $artwork->fresh()->load('tags');
     }
 
     private function handleImage(array $data)

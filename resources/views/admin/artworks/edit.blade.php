@@ -34,7 +34,7 @@
             </div>
 
             <!-- Tags -->
-            <x-form.select name="tags[]" label="Tags" :options="$tags->pluck('name', 'id')" :selected="$artwork->tags->pluck('id')->toArray()" multiple />
+            <x-form.select name="tags" label="Tags" :options="$tags->pluck('name', 'id')" :selected="$artwork->tags->pluck('id')->toArray()" multiple />
 
             <!-- Description -->
             <x-form.textarea name="description" label="Description"
@@ -55,12 +55,10 @@
                 value="{{ old('year_created', $artwork->year_created) }}" />
 
             <!-- Availability -->
-            <input type="hidden" name="is_available" value="0">
-            <x-form.checkbox name="is_available" label="Available" :checked="old('is_available', $artwork->is_available)" />
+            <x-form.checkbox name="is_available" label="Available" :value="$artwork->is_available" />
 
             <!-- Featured -->
-            <input type="hidden" name="is_featured" value="0">
-            <x-form.checkbox name="is_featured" label="Featured" :checked="old('is_featured', $artwork->is_featured)" />
+            <x-form.checkbox name="is_featured" label="Featured" :value="$artwork->is_featured" />
 
             <!-- Stock -->
             <x-form.input type="number" name="stock" label="Stock" value="{{ old('stock', $artwork->stock) }}"

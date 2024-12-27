@@ -9,6 +9,7 @@ use App\Models\Artist;
 use App\Models\Category;
 use App\Models\Tag;
 use App\Services\ArtworkService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ArtworkController extends Controller
@@ -67,15 +68,20 @@ class ArtworkController extends Controller
      */
     public function update(ArtworkRequest $request, $id)
     {
-        // Find the artwork by ID
-        $artwork = Artwork::findOrFail($id);
 
-        // Call the service to handle the update
+        Log::info('Request data:', $request->all());
+        Log::info('Validated data:', $request->validated());
+
+        $artwork = Artwork::findOrFail($id);
         $updatedArtwork = $this->artworkService->update($artwork, $request->validated());
 
-        // Redirect with success message
+        Log::info('Updated artwork:', $updatedArtwork->toArray());
+        Log::info('Tags after update:', $updatedArtwork->tags->toArray());
+
         return redirect()->route('admin.artworks.index')->with('success', 'Artwork updated successfully!');
     }
+
+
 
     /**
      * Remove the specified artwork from storage.

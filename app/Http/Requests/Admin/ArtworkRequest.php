@@ -19,7 +19,7 @@ class ArtworkRequest extends FormRequest
             'parent_category_id' => 'nullable|exists:categories,id',
             'category_id' => 'nullable|exists:categories,id',
             'tags' => 'nullable|array',
-            'tags.*' => 'exists:tags,id',
+            'tags.*' => 'integer|exists:tags,id',
             'description' => 'nullable|string',
             'price' => 'required|numeric',
             'dimensions' => 'nullable|string',
