@@ -12,15 +12,14 @@ class ArtworkService
 {
     public function create(array $data)
     {
-        // Process the image and return the data with the image path
         $data = $this->handleImage($data);
 
-        // Create the artwork and save it to the database
         $artwork = Artwork::create($data);
 
-        // Sync categories and tags if provided
-        if (isset($data['categories'])) {
-            $artwork->categories()->sync($data['categories']);
+        if (isset($data['category_id'])) {
+            $artwork->categories()->attach($data['category_id']);
+        } elseif (isset($data['parent_category_id'])) {
+            $artwork->categories()->attach($data['parent_category_id']);
         }
 
         if (isset($data['tags'])) {
@@ -29,7 +28,6 @@ class ArtworkService
 
         return $artwork;
     }
-
     /**
      * Update an artwork with the provided data.
      *
@@ -39,33 +37,28 @@ class ArtworkService
      */
     public function update(Artwork $artwork, array $data)
     {
-        Log::debug($data);
-
-        // Handle image upload if provided
         if (isset($data['image'])) {
-            // Delete the old image if it exists
             if ($artwork->image) {
                 Storage::disk('public')->delete($artwork->image);
             }
 
-            // Process and store the new image
             $imagePath = $data['image']->store('artworks', 'public');
-            $data['image'] = $imagePath; // Save the new path to the data array
+            $data['image'] = $imagePath;
         }
 
-        // Update the artwork attributes directly
-        $artwork->fill($data); // Uses model's $fillable to mass assign
-
-        // Save the changes to the database
-        $artwork->save();
-
-        // Sync categories and tags if provided
-        if (isset($data['categories'])) {
-            $artwork->categories()->sync($data['categories']);
+        $artwork->fill($data);
+        $artwork->update($data);
+        if (isset($data['category_id'])) {
+            $artwork->categories()->sync([$data['category_id']]);
+        } elseif (isset($data['parent_id'])) {
+            $artwork->categories()->sync([$data['parent_id']]);
         }
 
         if (isset($data['tags'])) {
-            $artwork->tags()->sync($data['tags']);
+            $tags = is_array($data['tags']) ? array_map('intval', $data['tags']) : [];
+            $artwork->tags()->sync($tags);
+        } else {
+            $artwork->tags()->sync([]);
         }
 
         return $artwork;

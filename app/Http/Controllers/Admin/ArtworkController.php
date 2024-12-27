@@ -35,10 +35,10 @@ class ArtworkController extends Controller
     public function create()
     {
         $artists = Artist::active()->orderBy('name')->get();
-        $categories = Category::orderBy('name')->get();
+        $parentCategories = Category::whereIsRoot()->orderBy('name')->get();
         $tags = Tag::orderBy('name')->get();
 
-        return view('admin.artworks.create', compact('artists', 'categories', 'tags'));
+        return view('admin.artworks.create', compact('artists', 'parentCategories', 'tags'));
     }
 
     /**
@@ -57,12 +57,11 @@ class ArtworkController extends Controller
     public function edit(Artwork $artwork)
     {
         $artists = Artist::active()->orderBy('name')->get();
-        $categories = Category::orderBy('name')->get();
+        $parentCategories = Category::whereIsRoot()->orderBy('name')->get();
         $tags = Tag::orderBy('name')->get();
 
-        return view('admin.artworks.edit', compact('artwork', 'artists', 'categories', 'tags'));
+        return view('admin.artworks.edit', compact('artwork', 'artists', 'parentCategories', 'tags'));
     }
-
     /**
      * Update the specified artwork in storage.
      */

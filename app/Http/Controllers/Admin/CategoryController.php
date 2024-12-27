@@ -94,4 +94,13 @@ class CategoryController extends Controller
             ->route('admin.categories.index')
             ->with('success', 'Category deleted successfully.');
     }
+
+    public function getChildren($parent_id)
+    {
+        $parentCategory = Category::findOrFail($parent_id);
+
+        $children = $parentCategory->children;
+
+        return response()->json($children);
+    }
 }

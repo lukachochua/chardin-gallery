@@ -16,8 +16,10 @@ class ArtworkRequest extends FormRequest
         return [
             'title' => 'required|string|max:255',
             'artist_id' => 'required|exists:artists,id',
-            'categories' => 'array',
-            'tags' => 'array',
+            'parent_category_id' => 'nullable|exists:categories,id',
+            'category_id' => 'nullable|exists:categories,id',
+            'tags' => 'nullable|array',
+            'tags.*' => 'exists:tags,id',
             'description' => 'nullable|string',
             'price' => 'required|numeric',
             'dimensions' => 'nullable|string',
@@ -27,10 +29,6 @@ class ArtworkRequest extends FormRequest
             'is_featured' => 'nullable|boolean',
             'stock' => 'required|integer',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'categories' => 'array',
-            'categories.*' => 'exists:categories,id',
-            'tags' => 'array',
-            'tags.*' => 'exists:tags,id'
         ];
     }
 }
