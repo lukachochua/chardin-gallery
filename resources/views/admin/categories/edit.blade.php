@@ -8,8 +8,7 @@
 
             <x-form.input name="name" label="Category Name" :value="old('name', $category->name)" required />
             <x-form.textarea name="description" label="Description" :value="old('description', $category->description)" />
-            <x-form.select name="parent_id" label="Parent Category" :options="$categories->pluck('name', 'id')->toArray()" :selected="old('parent_id', $category->parent_id)" />
-
+            <x-form.select name="parent_id" label="Parent Category" :options="$categories" :selected="old('parent_id', $category->parent_id)" />
             <div class="flex justify-end">
                 <button type="submit"
                     class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium text-sm rounded-md">

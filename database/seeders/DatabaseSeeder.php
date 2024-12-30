@@ -45,8 +45,18 @@ class DatabaseSeeder extends Seeder
         $category1 = Category::create(['name' => 'Painting', 'slug' => 'painting']);
 
         // Create child categories under 'Painting'
-        $abstractCategory = $category1->children()->create(['name' => 'Abstract', 'slug' => 'abstract']);
-        $realismCategory = $category1->children()->create(['name' => 'Realism', 'slug' => 'realism']);
+        $abstractCategory = Category::create([
+            'name' => 'Abstract',
+            'slug' => 'abstract',
+            'parent_id' => $category1->id, // Explicitly set parent_id
+        ]);
+
+        $realismCategory = Category::create([
+            'name' => 'Realism',
+            'slug' => 'realism',
+            'parent_id' => $category1->id, // Explicitly set parent_id
+        ]);
+
 
         // Create another parent category
         $category2 = Category::create(['name' => 'Sculpture', 'slug' => 'sculpture']);

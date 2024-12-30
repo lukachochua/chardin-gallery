@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class CategoryRequest extends FormRequest
 {
@@ -16,7 +17,14 @@ class CategoryRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|string|max:255|unique:categories,name,' . ($this->category ? $this->category->id : ''),
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('categories')->where(function ($query) {
+                    $query->where('parent_id', $this->input('parent_id'));
+                })->ignore($this->category ? $this->category->id : null),
+            ],
             'description' => 'nullable|string',
             'parent_id' => 'nullable|exists:categories,id',
         ];
@@ -24,6 +32,6 @@ class CategoryRequest extends FormRequest
 
     public function authorize()
     {
-        return true; 
+        return true;
     }
 }

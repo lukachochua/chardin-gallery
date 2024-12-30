@@ -67,7 +67,14 @@ class CategoryController extends Controller
     public function edit(string $id)
     {
         $category = Category::findOrFail($id);
-        $categories = Category::all(); // Fetch all categories for the parent selection
+        $categories = Category::where('id', '!=', $category->id) 
+            ->get()
+            ->pluck('name', 'id')
+            ->toArray();
+
+        // Add the "No Parent" option
+        $categories = ['' => 'No Parent (Make Root Category)'] + $categories;
+
         return view('admin.categories.edit', compact('category', 'categories'));
     }
 
@@ -76,11 +83,18 @@ class CategoryController extends Controller
      */
     public function update(CategoryRequest $request, string $id)
     {
-        $category = Category::findOrFail($id);
-        $this->categoryService->update($category, $request->validated());
-        return redirect()
-            ->route('admin.categories.index')
-            ->with('success', 'Category updated successfully.');
+        try {
+            $category = Category::findOrFail($id);
+            $this->categoryService->update($category, $request->validated());
+            return redirect()
+                ->route('admin.categories.index')
+                ->with('success', 'Category updated successfully.');
+        } catch (\InvalidArgumentException $e) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors(['name' => $e->getMessage()]);
+        }
     }
 
     /**
