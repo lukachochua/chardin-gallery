@@ -14,7 +14,7 @@
             <x-form.select name="artist_id" label="Artist" :options="$artists->pluck('name', 'id')" :selected="$artwork->artist_id" required />
 
             <!-- Parent Category -->
-            <x-form.select name="parent_category_id" label="Parent Category" :options="$parentCategories->pluck('name', 'id')" :selected="old('parent_category_id', $artwork->categories->whereNull('parent_id')->first()?->id)"
+            <x-form.select name="parent_id" label="Parent Category" :options="$parentCategories->pluck('name', 'id')" :selected="old('parent_id', $artwork->categories->whereNull('parent_id')->first()?->id)"
                 x-model="parentCategoryId" x-on:change="fetchChildCategories" />
 
             <!-- Child Category -->

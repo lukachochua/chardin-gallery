@@ -12,7 +12,7 @@
             <x-form.select name="artist_id" label="Artist" :options="$artists->pluck('name', 'id')" :selected="old('artist_id')" required />
 
             <!-- Parent Category -->
-            <x-form.select name="parent_category_id" label="Parent Category" :options="$parentCategories->pluck('name', 'id')" :selected="old('parent_category_id', $parentCategories->first()?->id)"
+            <x-form.select name="parent_id" label="Parent Category" :options="$parentCategories->pluck('name', 'id')" :selected="old('parent_id', $parentCategories->first()?->id)"
                 x-model="parentCategoryId" x-on:change="fetchChildCategories" />
 
             <!-- Child Category -->
@@ -66,7 +66,7 @@
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('categoryForm', () => ({
-                parentCategoryId: {{ old('parent_category_id', $parentCategories->first()?->id) ?? 'null' }},
+                parentCategoryId: {{ old('parent_id', $parentCategories->first()?->id) ?? 'null' }},
                 childCategories: [],
 
                 init() {
