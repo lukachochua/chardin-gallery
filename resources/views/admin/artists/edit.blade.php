@@ -10,4 +10,4 @@
             <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md">Update</button>
         </form>
     </div>
-</x-layouts.admin
+</x-layouts.admin>
