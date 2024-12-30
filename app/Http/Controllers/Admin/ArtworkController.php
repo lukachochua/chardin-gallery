@@ -61,6 +61,11 @@ class ArtworkController extends Controller
         $parentCategories = Category::whereIsRoot()->orderBy('name')->get();
         $tags = Tag::orderBy('name')->get();
 
+        Log::info('Artwork categories:', [
+            'parent' => $artwork->categories->whereNull('parent_id')->first(),
+            'child' => $artwork->categories->whereNotNull('parent_id')->first()
+        ]);
+
         return view('admin.artworks.edit', compact('artwork', 'artists', 'parentCategories', 'tags'));
     }
     /**

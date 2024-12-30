@@ -16,7 +16,7 @@ class ArtworkRequest extends FormRequest
         return [
             'title' => 'required|string|max:255',
             'artist_id' => 'required|exists:artists,id',
-            'parent_category_id' => 'nullable|exists:categories,id',
+            'parent_id' => 'nullable|exists:categories,id',
             'category_id' => 'nullable|exists:categories,id',
             'tags' => 'nullable|array',
             'tags.*' => 'integer|exists:tags,id',

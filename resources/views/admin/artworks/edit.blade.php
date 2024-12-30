@@ -76,14 +76,17 @@
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('categoryForm', () => ({
-                parentCategoryId: {{ $artwork->categories->whereNull('parent_id')->first()?->id ?? 'null' }},
+                parentCategoryId: {{ $artwork->categories->whereNull('parent_id')->first()?->id ?? ($parentCategories->first()?->id ?? 'null') }},
                 childCategories: [],
+                isLoading: true,
 
                 init() {
-                    // Automatically fetch child categories if a parent category is already selected
+                    console.log('Initializing with parentCategoryId:', this.parentCategoryId);
+
                     if (this.parentCategoryId) {
                         this.fetchChildCategories();
                     }
+                    this.isLoading = false;
                 },
 
                 async fetchChildCategories() {
@@ -92,18 +95,27 @@
                         return;
                     }
 
-                    console.log('Fetching child categories for parent ID:', this.parentCategoryId);
+                    try {
+                        const response = await fetch(
+                            `/admin/api/categories/${this.parentCategoryId}/children`);
+                        const data = await response.json();
+                        console.log('Fetched child categories:', data);
 
-                    const response = await fetch(
-                        `/admin/api/categories/${this.parentCategoryId}/children`);
-                    const data = await response.json();
+                        const selectedChildId =
+                            {{ $artwork->categories->whereNotNull('parent_id')->first()?->id ?? 'null' }};
+                        console.log('Selected child ID:', selectedChildId);
 
-                    console.log('Child categories:', data);
+                        this.childCategories = data.map(category => ({
+                            id: category.id,
+                            name: category.name,
+                            selected: category.id === selectedChildId
+                        }));
 
-                    this.childCategories = data.map(category => ({
-                        id: category.id,
-                        name: category.name
-                    }));
+                        console.log('Processed child categories:', this.childCategories);
+                    } catch (error) {
+                        console.error('Error fetching child categories:', error);
+                        this.childCategories = [];
+                    }
                 }
             }));
         });
