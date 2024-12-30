@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Artist;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
 use Intervention\Image\ImageManager;
@@ -35,19 +36,27 @@ class ArtistService
 
     private function handleProfileImage(UploadedFile $image)
     {
-        $path = $image->store('artists', 'public');
-        $fullPath = Storage::disk('public')->path($path);
+        try {
+            $path = $image->store('artists', 'public');
+            $fullPath = Storage::disk('public')->path($path);
 
-        $img = new ImageManager('gd');
-        $image = $img->read($fullPath);
+            $manager = new ImageManager(
+                driver: \Intervention\Image\Drivers\Gd\Driver::class
+            );
 
-        $image->resize(800, 800, function ($constraint) {
-            $constraint->aspectRatio();
-            $constraint->upsize();
-        });
+            $img = $manager->read($fullPath);
 
-        $image->save($fullPath);
+            $img->resize(800, 800, function ($constraint) {
+                $constraint->aspectRatio(); 
+                $constraint->upsize();    
+            });
 
-        return $path;
+            $img->save($fullPath);
+
+            return $path;
+        } catch (\Exception $e) {
+            Log::error('Profile image processing failed: ' . $e->getMessage());
+            throw $e;
+        }
     }
 }
