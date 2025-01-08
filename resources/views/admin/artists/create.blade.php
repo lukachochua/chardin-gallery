@@ -12,7 +12,9 @@
             <x-form.input type="file" name="profile_image" label="Profile Image" />
             <x-form.checkbox name="is_active" label="Active" checked />
 
-            <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-md">Save</button>
+            <div class="flex justify-end">
+                <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-md">Save</button>
+            </div>
         </form>
     </div>
 </x-layouts.admin>

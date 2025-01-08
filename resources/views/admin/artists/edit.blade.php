@@ -16,13 +16,15 @@
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700">Current Profile Image</label>
                     <img src="{{ asset('storage/' . $artist->profile_image) }}" alt="Profile Image"
-                        class="w-20 h-20 object-cover mt-2 rounded rounded-lg">
+                        class="w-20 h-20 object-cover mt-2 rounded-lg">
                 </div>
             @endif
             <x-form.input type="file" name="profile_image" label="Profile Image" />
             <x-form.checkbox name="is_active" label="Active" :value="old('is_active', $artist->is_active)" />
 
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md">Update</button>
+            <div class="flex justify-end">
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md">Update</button>
+            </div>
         </form>
     </div>
 </x-layouts.admin>
