@@ -67,7 +67,7 @@ class CategoryController extends Controller
     public function edit(string $id)
     {
         $category = Category::findOrFail($id);
-        $categories = Category::where('id', '!=', $category->id) 
+        $categories = Category::where('id', '!=', $category->id)
             ->get()
             ->pluck('name', 'id')
             ->toArray();
@@ -81,10 +81,9 @@ class CategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(CategoryRequest $request, string $id)
+    public function update(CategoryRequest $request, Category $category)
     {
         try {
-            $category = Category::findOrFail($id);
             $this->categoryService->update($category, $request->validated());
             return redirect()
                 ->route('admin.categories.index')
@@ -93,7 +92,7 @@ class CategoryController extends Controller
             return redirect()
                 ->back()
                 ->withInput()
-                ->withErrors(['name' => $e->getMessage()]);
+                ->withErrors(['error' => $e->getMessage()]);
         }
     }
 
@@ -116,5 +115,20 @@ class CategoryController extends Controller
         $children = $parentCategory->children;
 
         return response()->json($children);
+    }
+
+    public function rebuildTree()
+    {
+        try {
+            Category::fixTree();
+
+            return redirect()
+                ->route('admin.categories.index')
+                ->with('success', 'Category tree has been rebuilt successfully.');
+        } catch (\Exception $e) {
+            return redirect()
+                ->route('admin.categories.index')
+                ->with('error', 'Failed to rebuild the category tree. Please try again.');
+        }
     }
 }

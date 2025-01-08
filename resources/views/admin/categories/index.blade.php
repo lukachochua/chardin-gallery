@@ -1,12 +1,29 @@
 <x-layouts.admin>
     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
         <div class="p-6 bg-white border-b border-gray-200">
+            {{-- Header Section with Primary Action --}}
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold">Categories</h2>
                 <a href="{{ route('admin.categories.create') }}"
                     class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                     Add New Category
                 </a>
+            </div>
+
+            {{-- Maintenance Actions Section --}}
+            <div class="mb-6 pb-4 border-b border-gray-200">
+                <form action="{{ route('admin.categories.rebuild-tree') }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit"
+                        class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded border border-gray-300 flex items-center"
+                        onclick="return confirm('Are you sure you want to rebuild the category tree? This will reorganize all categories based on their parent-child relationships.')">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Rebuild Category Tree
+                    </button>
+                </form>
             </div>
 
             <div class="overflow-x-auto">
@@ -33,13 +50,27 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @foreach ($categories as $category)
-                            <tr>
+                            <tr class="{{ $category->depth > 0 ? 'bg-gray-50' : '' }}">
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    {!! str_repeat('&mdash;', $category->depth) !!}
-                                    {{ $category->name }}
+                                    <div class="flex items-center">
+                                        <span class="text-gray-400 mr-2">
+                                            {!! str_repeat('⤷', $category->depth) !!}
+                                        </span>
+                                        {{ $category->name }}
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    {{ $category->depth == 0 ? 'Root' : 'Level ' . $category->depth }}
+                                    @if ($category->isRoot())
+                                        <span
+                                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                            Root
+                                        </span>
+                                    @else
+                                        <span
+                                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                            Level {{ $category->depth }}
+                                        </span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     {{ $category->parent ? $category->parent->name : '-' }}

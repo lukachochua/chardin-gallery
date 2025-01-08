@@ -14,8 +14,7 @@ class Category extends Model
     protected $fillable = [
         'name',
         'slug',
-        'description',
-        'parent_id'
+        'description'
     ];
 
     // Generate slug from name
@@ -33,22 +32,9 @@ class Category extends Model
         });
     }
 
-    // Relationships
     public function artworks()
     {
         return $this->belongsToMany(Artwork::class)
             ->withTimestamps();
-    }
-
-    // Get all children categories
-    public function children()
-    {
-        return $this->hasMany(Category::class, 'parent_id');
-    }
-
-    // Get parent category
-    public function parent()
-    {
-        return $this->belongsTo(Category::class, 'parent_id');
     }
 }

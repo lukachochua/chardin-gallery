@@ -84,6 +84,8 @@ Route::group([
     Route::delete('categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
     Route::post('categories/reorder', [CategoryController::class, 'reorder'])->name('categories.reorder');
     Route::get('/api/categories/{parent_id}/children', [CategoryController::class, 'getChildren']);
+    Route::post('categories/rebuild-tree', [CategoryController::class, 'rebuildTree'])
+        ->name('categories.rebuild-tree');
 
     // Tags Management
     Route::get('tags', [TagController::class, 'index'])->name('tags.index');

@@ -12,8 +12,23 @@ class CategoryService
      */
     public function create(array $data)
     {
-        $data['slug'] = Str::slug($data['name']);
-        return Category::create($data);
+        $category = new Category([
+            'name' => $data['name'],
+            'slug' => Str::slug($data['name']),
+            'description' => $data['description'] ?? null,
+        ]);
+
+        if (!empty($data['parent_id'])) {
+            $parent = Category::findOrFail($data['parent_id']);
+            $category->parent_id = $parent->id;
+            $category->save();
+            $category->appendToNode($parent)->save();
+        } else {
+            // Explicitly save as root
+            $category->saveAsRoot();
+        }
+
+        return $category;
     }
 
     /**
@@ -21,40 +36,28 @@ class CategoryService
      */
     public function update(Category $category, array $data)
     {
-        // Ensure a category cannot be its own parent
-        if (isset($data['parent_id']) && $data['parent_id'] == $category->id) {
-            throw new \InvalidArgumentException("A category cannot be its own parent.");
-        }
+        $category->fill([
+            'name' => $data['name'],
+            'description' => $data['description'] ?? $category->description,
+            'slug' => Str::slug($data['name'])
+        ]);
 
-        // Check if the name is unique within the new parent category
-        if (isset($data['name'])) {
-            $existingCategory = Category::where('name', $data['name'])
-                ->where('parent_id', $data['parent_id'] ?? $category->parent_id)
-                ->where('id', '!=', $category->id)
-                ->first();
-
-            if ($existingCategory) {
-                throw new \InvalidArgumentException("The name is already taken within the selected parent category.");
-            }
-        }
-
-        // Update the category
-        $data['slug'] = Str::slug($data['name']);
-        $category->update($data);
-
-        // If the parent_id is changed, move the category to the new parent
         if (array_key_exists('parent_id', $data)) {
-            if ($data['parent_id']) {
-                $parent = Category::find($data['parent_id']);
-                if ($parent) {
-                    $category->appendToNode($parent)->save();
+            if ($data['parent_id'] === null) {
+                if (!$category->isRoot()) {
+                    $category->saveAsRoot();
                 }
             } else {
-                // If parent_id is null, make the category a root category
-                $category->makeRoot()->save();
+                $newParent = Category::findOrFail($data['parent_id']);
+                if ($category->parent_id != $data['parent_id']) {
+                    $category->parent_id = $newParent->id;
+                    $category->save();
+                    $category->appendToNode($newParent)->save();
+                }
             }
         }
 
+        $category->save();
         return $category;
     }
 
