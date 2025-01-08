@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\ArtistController;
 use App\Http\Controllers\Admin\ArtworkController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\TagController;
+use App\Http\Controllers\ArtworkCatalogController;
 
 // // Public Controllers
 // use App\Http\Controllers\HomeController;
@@ -15,6 +16,10 @@ use App\Http\Controllers\Admin\TagController;
 // use App\Http\Controllers\ArtistPageController;
 // use App\Http\Controllers\CartController;
 // use App\Http\Controllers\CheckoutController;
+
+Route::get('/', [ArtworkCatalogController::class, 'index'])->name('home');
+Route::get('/artworks', [ArtworkCatalogController::class, 'index'])->name('artworks.index');
+Route::get('/artworks/{artwork:slug}', [ArtworkCatalogController::class, 'show'])->name('artworks.show');
 
 // // Public Routes
 // Route::get('/', [HomeController::class, 'index'])->name('home');
