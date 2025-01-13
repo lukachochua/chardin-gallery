@@ -15,7 +15,7 @@
                     class="text-gray-700 hover:text-gray-900 font-medium transition duration-300">
                     Artworks
                 </a>
-                <a href="#" class="text-gray-700 hover:text-gray-900 font-medium transition duration-300">
+                <a href="{{ route('artists.index') }}" class="text-gray-700 hover:text-gray-900 font-medium transition duration-300">
                     Artists
                 </a>
                 <a href="#" class="text-gray-700 hover:text-gray-900 font-medium transition duration-300">

@@ -40,16 +40,15 @@ class Artwork extends Model
         parent::boot();
 
         static::creating(function ($artwork) {
-            $artwork->slug = Str::slug($artwork->title);
+            $artwork->slug = static::generateUniqueSlug($artwork->title);
         });
 
         static::updating(function ($artwork) {
             if ($artwork->isDirty('title')) {
-                $artwork->slug = Str::slug($artwork->title);
+                $artwork->slug = static::generateUniqueSlug($artwork->title, $artwork->id);
             }
         });
     }
-
     // Relationships
     public function artist()
     {
@@ -78,5 +77,30 @@ class Artwork extends Model
     public function scopeFeatured($query)
     {
         return $query->where('is_featured', true);
+    }
+
+
+    /**
+     * Generate a unique slug for the given title.
+     *
+     * @param  string  $title
+     * @param  int|null  $ignoreId
+     * @return string
+     */
+    protected static function generateUniqueSlug($title, $ignoreId = null)
+    {
+        $slug = Str::slug($title);
+        $originalSlug = $slug;
+
+        $count = 1;
+        while (static::where('slug', $slug)
+            ->when($ignoreId, fn($query) => $query->where('id', '!=', $ignoreId))
+            ->exists()
+        ) {
+            $slug = "{$originalSlug}-{$count}";
+            $count++;
+        }
+
+        return $slug;
     }
 }
