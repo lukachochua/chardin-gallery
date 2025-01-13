@@ -12,6 +12,7 @@ use App\Models\Category;
 use App\Models\Tag;
 use App\Models\Artist;
 use App\Models\Artwork;
+use App\Models\User;
 
 class DatabaseSeeder extends Seeder
 {
@@ -30,6 +31,14 @@ class DatabaseSeeder extends Seeder
         if (!is_dir(storage_path('app/public/artists'))) {
             mkdir(storage_path('app/public/artists'), 0755, true);
         }
+
+        User::create([
+            'name' => 'luka',
+            'is_admin' => true,
+            'email' => 'test@example.com',
+            'password' => 'password',
+        ]);
+
 
         // Seed Categories with Nested Structure
         $this->seedCategories();

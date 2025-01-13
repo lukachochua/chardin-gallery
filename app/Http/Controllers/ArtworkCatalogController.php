@@ -17,30 +17,32 @@ class ArtworkCatalogController extends Controller
         $query = Artwork::query()->with(['artist', 'categories', 'tags']);
 
         // Filter by artist
-        if ($request->has('artist')) {
+        if ($request->has('artist') && $request->artist != '') {
             $query->where('artist_id', $request->artist);
         }
 
-        // Filter by category
-        if ($request->has('category')) {
-            $query->whereHas('categories', function ($q) use ($request) {
-                $q->where('categories.id', $request->category);
-            });
+        // Filter by category including subcategories
+        if ($request->has('category') && $request->category != '') {
+            $selectedCategory = Category::find($request->category);
+            if ($selectedCategory) {
+                // Get all descendant categories (including the selected category)
+                $categoryIds = $selectedCategory->descendants()->pluck('id')->push($selectedCategory->id);
+
+                // Filter artworks by category IDs
+                $query->whereHas('categories', function ($q) use ($categoryIds) {
+                    $q->whereIn('categories.id', $categoryIds);
+                });
+            }
         }
 
-        // Filter by price range
-        if ($request->has('min_price') && $request->has('max_price')) {
-            $query->whereBetween('price', [$request->min_price, $request->max_price]);
+        // Filter by min price
+        if ($request->has('min_price') && $request->min_price != '') {
+            $query->where('price', '>=', $request->min_price);
         }
 
-        // Filter by availability
-        if ($request->has('available')) {
-            $query->where('is_available', true);
-        }
-
-        // Filter by featured
-        if ($request->has('featured')) {
-            $query->where('is_featured', true);
+        // Filter by max price
+        if ($request->has('max_price') && $request->max_price != '') {
+            $query->where('price', '<=', $request->max_price);
         }
 
         // Search by keyword
@@ -52,7 +54,7 @@ class ArtworkCatalogController extends Controller
             });
         }
 
-        $artworks = $query->paginate(12);
+        $artworks = $query->paginate(12)->withQueryString();
 
         $artists = Artist::all();
         $categories = Category::all();

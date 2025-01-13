@@ -47,11 +47,17 @@
                         class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
                 </div>
 
+                <!-- Search Input -->
+                <div>
+                    <label for="search" class="block text-sm font-medium text-gray-700">Search</label>
+                    <input type="text" name="search" id="search" value="{{ request('search') }}"
+                        class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                </div>
+
                 <!-- Submit Button -->
                 <div class="sm:col-span-2 lg:col-span-4">
-                    <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700">
-                        Apply Filters
-                    </button>
+                    <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700">Apply
+                        Filters</button>
                 </div>
             </form>
         </div>

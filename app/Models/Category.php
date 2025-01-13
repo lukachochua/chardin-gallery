@@ -17,7 +17,10 @@ class Category extends Model
         'description'
     ];
 
-    // Generate slug from name
+    protected $nestedSetLeftColumn = '_lft';
+    protected $nestedSetRightColumn = '_rht';
+    protected $nestedSetParentColumn = 'parent_id';
+
     protected static function boot()
     {
         parent::boot();
