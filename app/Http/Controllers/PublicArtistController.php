@@ -13,7 +13,7 @@ class PublicArtistController extends Controller
             ->when($request->search, function ($query, $search) {
                 return $query->where('name', 'like', '%' . $search . '%');
             })
-            ->when($request->has('status'), function ($query) use ($request) {
+            ->when($request->has('status') && in_array($request->status, ['1', '0']), function ($query) use ($request) {
                 return $query->where('is_active', $request->status);
             })
             ->latest()
