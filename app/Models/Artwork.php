@@ -49,6 +49,7 @@ class Artwork extends Model
             }
         });
     }
+
     // Relationships
     public function artist()
     {
@@ -66,6 +67,12 @@ class Artwork extends Model
         return $this->belongsToMany(Tag::class)
             ->withTimestamps();
     }
+
+    public function exhibitions()
+    {
+        return $this->belongsToMany(Exhibition::class);
+    }
+
 
     // Scopes
     public function scopeAvailable($query)

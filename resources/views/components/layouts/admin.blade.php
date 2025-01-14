@@ -47,6 +47,11 @@
                             class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition duration-150">
                             Categories
                         </x-nav-link>
+                        <!-- Add the Exhibitions link -->
+                        <x-nav-link :href="route('admin.exhibitions.index')" :active="request()->routeIs('admin.exhibitions.*')"
+                            class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition duration-150">
+                            Exhibitions
+                        </x-nav-link>
 
                         <!-- Logout Button -->
                         <div class="flex items-center h-full ml-4 border-l border-gray-200 pl-4">

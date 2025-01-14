@@ -12,6 +12,7 @@ use App\Models\Category;
 use App\Models\Tag;
 use App\Models\Artist;
 use App\Models\Artwork;
+use App\Models\Exhibition;
 use App\Models\User;
 
 class DatabaseSeeder extends Seeder
@@ -21,8 +22,10 @@ class DatabaseSeeder extends Seeder
         // Ensure storage directories exist and are created recursively
         Storage::deleteDirectory('public/artworks');
         Storage::deleteDirectory('public/artists');
+        Storage::deleteDirectory('public/exhibitions');  // Add directory for exhibitions
         Storage::makeDirectory('public/artworks', 0755, true);
         Storage::makeDirectory('public/artists', 0755, true);
+        Storage::makeDirectory('public/exhibitions', 0755, true);  // Create directory for exhibitions
 
         // Create physical directories just to be sure
         if (!is_dir(storage_path('app/public/artworks'))) {
@@ -31,6 +34,9 @@ class DatabaseSeeder extends Seeder
         if (!is_dir(storage_path('app/public/artists'))) {
             mkdir(storage_path('app/public/artists'), 0755, true);
         }
+        if (!is_dir(storage_path('app/public/exhibitions'))) {  // Check for exhibitions directory
+            mkdir(storage_path('app/public/exhibitions'), 0755, true);
+        }
 
         User::create([
             'name' => 'luka',
@@ -38,7 +44,6 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
             'password' => 'password',
         ]);
-
 
         // Seed Categories with Nested Structure
         $this->seedCategories();
@@ -51,7 +56,11 @@ class DatabaseSeeder extends Seeder
 
         // Seed Artworks
         $this->seedArtworks($artists, $tags);
+
+        // Seed Exhibitions after Artists and Artworks
+        $this->seedExhibitions($artists);
     }
+
 
     private function seedCategories(): void
     {
@@ -192,6 +201,44 @@ class DatabaseSeeder extends Seeder
                 // Attach random tags
                 $randomTags = array_slice($tags, 0, 2);
                 $artworkModel->tags()->attach(array_column($randomTags, 'id'));
+            }
+        }
+    }
+
+    private function seedExhibitions(array $artists): void
+    {
+        DB::table('exhibitions')->delete();
+
+        $faker = \Faker\Factory::create();
+
+        foreach ($artists as $artist) {
+            foreach (range(1, 2) as $index) {  // Adjust number of exhibitions per artist
+                $title = $faker->sentence(3);
+                $imagePath = 'exhibitions/' . Str::slug($title) . '-' . $index . '.jpg';
+
+                // Generate actual image
+                $this->generatePlaceholderImage($title, $imagePath);
+
+                $exhibition = [
+                    'artist_id' => $artist['id'], // Assign artist_id here
+                    'title' => $title,
+                    'slug' => Str::slug($title . '-' . $artist['id']),
+                    'description' => $faker->paragraph,
+                    'start_date' => $faker->dateTimeThisYear(),
+                    'end_date' => $faker->dateTimeThisYear(),
+                    'location' => $faker->city,
+                    'image' => $imagePath,
+                ];
+
+                // Create the exhibition
+                $exhibitionModel = Exhibition::create($exhibition);
+
+                // Optionally attach artworks to the exhibition
+                $artworks = Artwork::where('artist_id', $artist['id'])->inRandomOrder()->limit(3)->get();
+
+                foreach ($artworks as $artwork) {
+                    $exhibitionModel->artworks()->attach($artwork->id);
+                }
             }
         }
     }

@@ -40,6 +40,12 @@ class Artist extends Model
         return $this->hasMany(Artwork::class);
     }
 
+    public function exhibitions()
+    {
+        return $this->belongsToMany(Exhibition::class);
+    }
+
+
     // Scopes
     public function scopeActive($query)
     {

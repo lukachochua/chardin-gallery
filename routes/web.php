@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ArtistController;
 use App\Http\Controllers\Admin\ArtworkController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ExhibitionController;
 use App\Http\Controllers\Admin\TagController;
 use App\Http\Controllers\ArtworkCatalogController;
 use App\Http\Controllers\PublicArtistController;
@@ -103,6 +104,14 @@ Route::group([
     Route::get('tags/{tag}/edit', [TagController::class, 'edit'])->name('tags.edit');
     Route::put('tags/{tag}', [TagController::class, 'update'])->name('tags.update');
     Route::delete('tags/{tag}', [TagController::class, 'destroy'])->name('tags.destroy');
+
+    // Exhibition Management
+    Route::get('exhibitions', [ExhibitionController::class, 'index'])->name('exhibitions.index');
+    Route::get('exhibitions/create', [ExhibitionController::class, 'create'])->name('exhibitions.create');
+    Route::post('exhibitions', [ExhibitionController::class, 'store'])->name('exhibitions.store');
+    Route::get('exhibitions/{exhibition}/edit', [ExhibitionController::class, 'edit'])->name('exhibitions.edit');
+    Route::put('exhibitions/{exhibition}', [ExhibitionController::class, 'update'])->name('exhibitions.update');
+    Route::delete('exhibitions/{exhibition}', [ExhibitionController::class, 'destroy'])->name('exhibitions.destroy');
 });
 
 require __DIR__ . '/auth.php';
