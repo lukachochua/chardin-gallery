@@ -32,7 +32,7 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     @foreach ($exhibitions as $exhibition)
                         <tr>
-                            <td class="px-6 py-4">{{ $exhibition->name }}</td>
+                            <td class="px-6 py-4">{{ $exhibition->title }}</td>
                             <td class="px-6 py-4">{{ $exhibition->status }}</td>
                             <td class="px-6 py-4">
                                 @forelse ($exhibition->artists as $artist)
