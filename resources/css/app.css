@@ -1,3 +1,46 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.hero {
+    background-image: url('/api/placeholder/1920/1080');
+    background-size: cover;
+    background-position: center;
+    height: calc(100vh - 5rem);
+    position: relative;
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+}
+
+.transition-smooth {
+    transition: all 0.3s ease-in-out;
+}
+
+.nav-active {
+    color: #000000;
+    border-bottom: 2px solid #000000;
+}
+
+.navbar {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(5px);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 50;
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        background: rgba(255, 255, 255, 0.8);
+    }
+}
