@@ -30,15 +30,22 @@ class ExhibitionController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string',
+            'title' => 'required|string',
             'start_date' => 'required|date',
-            'duration_days' => 'required|integer',
-            'status' => 'required|in:upcoming,running,done',
+            'end_date' => 'required|date',
+            'location' => 'required|string',
+            'image' => 'required|string',
             'artists' => 'array',
             'artworks' => 'array',
         ]);
 
-        $exhibition = Exhibition::create($request->only(['name', 'start_date', 'duration_days', 'status']));
+        $exhibition = Exhibition::create($request->only([
+            'title',
+            'start_date',
+            'end_date',
+            'location',
+            'image'
+        ]));
 
         // Sync artists and artworks
         if ($request->has('artists')) {
@@ -63,18 +70,47 @@ class ExhibitionController extends Controller
     // Update the specified exhibition
     public function update(Request $request, Exhibition $exhibition)
     {
-        $request->validate([
-            'name' => 'required|string',
+        // Base validation rules
+        $validationRules = [
+            'title' => 'required|string',
             'start_date' => 'required|date',
-            'duration_days' => 'required|integer',
-            'status' => 'required|in:upcoming,running,done',
+            'end_date' => 'required|date',
+            'location' => 'required|string',
             'artists' => 'array',
             'artworks' => 'array',
+        ];
+
+        // Add image validation only if a new image is being uploaded
+        if ($request->hasFile('image')) {
+            $validationRules['image'] = 'required|image|mimes:jpeg,png,jpg,gif|max:2048';
+        }
+
+        $request->validate($validationRules);
+
+        // Prepare data for update
+        $data = $request->only([
+            'title',
+            'start_date',
+            'end_date',
+            'location',
         ]);
 
-        $exhibition->update($request->only(['name', 'start_date', 'duration_days', 'status']));
+        // Handle image upload if a new image is provided
+        if ($request->hasFile('image')) {
+            // Delete old image if it exists
+            if ($exhibition->image && Storage::exists('public/' . $exhibition->image)) {
+                Storage::delete('public/' . $exhibition->image);
+            }
 
-        // Sync artists and artworks
+            // Store new image
+            $imagePath = $request->file('image')->store('exhibitions', 'public');
+            $data['image'] = $imagePath;
+        }
+
+        // Update exhibition
+        $exhibition->update($data);
+
+        // Sync relationships
         if ($request->has('artists')) {
             $exhibition->artists()->sync($request->artists);
         }
@@ -83,7 +119,9 @@ class ExhibitionController extends Controller
             $exhibition->artworks()->sync($request->artworks);
         }
 
-        return redirect()->route('admin.exhibitions.index')->with('success', 'Exhibition updated successfully.');
+        return redirect()
+            ->route('admin.exhibitions.index')
+            ->with('success', 'Exhibition updated successfully.');
     }
 
     // Remove the specified exhibition

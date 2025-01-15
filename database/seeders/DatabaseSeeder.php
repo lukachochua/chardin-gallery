@@ -208,11 +208,13 @@ class DatabaseSeeder extends Seeder
     private function seedExhibitions(array $artists): void
     {
         DB::table('exhibitions')->delete();
+        DB::table('artist_exhibition')->delete();
+        DB::table('artwork_exhibition')->delete();
 
         $faker = \Faker\Factory::create();
 
         foreach ($artists as $artist) {
-            foreach (range(1, 2) as $index) {  // Adjust number of exhibitions per artist
+            foreach (range(1, 2) as $index) {
                 $title = $faker->sentence(3);
                 $imagePath = 'exhibitions/' . Str::slug($title) . '-' . $index . '.jpg';
 
@@ -220,9 +222,8 @@ class DatabaseSeeder extends Seeder
                 $this->generatePlaceholderImage($title, $imagePath);
 
                 $exhibition = [
-                    'artist_id' => $artist['id'], // Assign artist_id here
                     'title' => $title,
-                    'slug' => Str::slug($title . '-' . $artist['id']),
+                    'slug' => Str::slug($title),
                     'description' => $faker->paragraph,
                     'start_date' => $faker->dateTimeThisYear(),
                     'end_date' => $faker->dateTimeThisYear(),
@@ -233,12 +234,16 @@ class DatabaseSeeder extends Seeder
                 // Create the exhibition
                 $exhibitionModel = Exhibition::create($exhibition);
 
-                // Optionally attach artworks to the exhibition
-                $artworks = Artwork::where('artist_id', $artist['id'])->inRandomOrder()->limit(3)->get();
+                // Attach the artist to the exhibition
+                $exhibitionModel->artists()->attach($artist['id']);
 
-                foreach ($artworks as $artwork) {
-                    $exhibitionModel->artworks()->attach($artwork->id);
-                }
+                // Attach random artworks to the exhibition
+                $artworks = Artwork::where('artist_id', $artist['id'])
+                    ->inRandomOrder()
+                    ->limit(3)
+                    ->get();
+
+                $exhibitionModel->artworks()->attach($artworks->pluck('id'));
             }
         }
     }

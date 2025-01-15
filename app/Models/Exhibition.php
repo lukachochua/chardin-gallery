@@ -11,7 +11,6 @@ class Exhibition extends Model
     use HasFactory;
 
     protected $fillable = [
-        'artist_id',
         'title',
         'slug',
         'description',
@@ -21,7 +20,6 @@ class Exhibition extends Model
         'image',
     ];
 
-    // Ensure that 'start_date' and 'end_date' are cast to Carbon instances
     protected $casts = [
         'start_date' => 'datetime',
         'end_date' => 'datetime',
@@ -29,30 +27,25 @@ class Exhibition extends Model
 
     public function artists()
     {
-        return $this->belongsToMany(Artist::class);  // Many-to-many with artists
+        return $this->belongsToMany(Artist::class)
+            ->withTimestamps();
     }
 
     public function artworks()
     {
-        return $this->belongsToMany(Artwork::class);  // Many-to-many with artworks
+        return $this->belongsToMany(Artwork::class)
+            ->withTimestamps();
     }
 
     public function getStatusAttribute()
     {
         $today = now();
 
-        // Check if the exhibition is upcoming
         if ($this->start_date > $today) {
             return 'upcoming';
-        }
-
-        // Check if the exhibition is currently running
-        elseif ($this->end_date > $today) {
+        } elseif ($this->end_date > $today) {
             return 'running';
-        }
-
-        // If the exhibition has ended
-        else {
+        } else {
             return 'done';
         }
     }
