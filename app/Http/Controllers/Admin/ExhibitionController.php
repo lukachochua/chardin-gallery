@@ -7,6 +7,7 @@ use App\Models\Exhibition;
 use App\Models\Artist;
 use App\Models\Artwork;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ExhibitionController extends Controller
 {
