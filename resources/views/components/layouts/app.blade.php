@@ -33,7 +33,7 @@
                         class="nav-link {{ request()->routeIs('artists.*') ? 'nav-active' : '' }}">
                         Artists
                     </a>
-                    <a href="#" class="nav-link">Exhibitions</a>
+                    <a href="{{ route('exhibitions.index') }}" class="nav-link {{ request()->routeIs('exhibitions.*') ? 'nav-active' : '' }}">Exhibitions</a>
                     <a href="#" class="nav-link">Shop</a>
                 </div>
 

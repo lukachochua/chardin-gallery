@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\ExhibitionController;
 use App\Http\Controllers\Admin\TagController;
 use App\Http\Controllers\ArtworkCatalogController;
 use App\Http\Controllers\PublicArtistController;
+use App\Http\Controllers\PublicExhibitionController;
 
 // // Public Controllers
 // use App\Http\Controllers\HomeController;
@@ -25,6 +26,9 @@ Route::get('/artworks/{artwork:slug}', [ArtworkCatalogController::class, 'show']
 
 Route::get('/artists', [PublicArtistController::class, 'index'])->name('artists.index');
 Route::get('/artists/{artist:slug}', [PublicArtistController::class, 'show'])->name('artists.show');
+
+Route::get('/exhibitions', [PublicExhibitionController::class, 'index'])->name('exhibitions.index');
+Route::get('/exhibitions/{exhibition:slug}', [PublicExhibitionController::class, 'show'])->name('exhibitions.show');
 
 // // Public Routes
 // Route::get('/', [HomeController::class, 'index'])->name('home');
