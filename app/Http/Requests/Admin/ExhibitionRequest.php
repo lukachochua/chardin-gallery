@@ -15,7 +15,7 @@ class ExhibitionRequest extends FormRequest
     {
         $rules = [
             'title' => 'required|string|max:255',
-            'description' => 'required|string', // Added this line
+            'description' => 'required|string',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'location' => 'required|string|max:255',
