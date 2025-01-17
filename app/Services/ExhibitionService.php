@@ -3,13 +3,17 @@
 namespace App\Services;
 
 use App\Models\Exhibition;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Intervention\Image\ImageManager;
 
 class ExhibitionService
 {
+    protected $imageService;
+
+    public function __construct(ImageService $imageService)
+    {
+        $this->imageService = $imageService;
+    }
 
     public function getAllExhibitions()
     {
@@ -19,7 +23,12 @@ class ExhibitionService
     public function createExhibition($data)
     {
         if (isset($data['image'])) {
-            $data['image'] = $this->handleImageUpload($data['image']);
+            $data['image'] = $this->imageService->handleImageUpload(
+                $data['image'],
+                'exhibitions',
+                800,
+                600
+            );
         }
 
         $data['slug'] = Str::slug($data['title']);
@@ -40,8 +49,15 @@ class ExhibitionService
     public function updateExhibition(Exhibition $exhibition, $data)
     {
         if (isset($data['image'])) {
-            $this->deleteImage($exhibition->image);
-            $data['image'] = $this->handleImageUpload($data['image']);
+            if ($exhibition->image) {
+                Storage::disk('public')->delete($exhibition->image);
+            }
+            $data['image'] = $this->imageService->handleImageUpload(
+                $data['image'],
+                'exhibitions',
+                800,
+                600
+            );
         }
 
         $exhibition->update($data);
@@ -59,40 +75,9 @@ class ExhibitionService
 
     public function deleteExhibition(Exhibition $exhibition)
     {
-        $this->deleteImage($exhibition->image);
+        if ($exhibition->image) {
+            Storage::disk('public')->delete($exhibition->image);
+        }
         $exhibition->delete();
-    }
-
-    private function handleImageUpload($image)
-    {
-        try {
-            $path = $image->store('exhibitions', 'public');
-            $fullPath = Storage::disk('public')->path($path);
-
-            $manager = new ImageManager(
-                driver: \Intervention\Image\Drivers\Gd\Driver::class
-            );
-
-            $img = $manager->read($fullPath);
-
-            $img->resize(800, 600, function ($constraint) {
-                $constraint->aspectRatio();
-                $constraint->upsize();
-            });
-
-            $img->save($fullPath);
-
-            return $path;
-        } catch (\Exception $e) {
-            Log::error('Image processing failed: ' . $e->getMessage());
-            throw $e;
-        }
-    }
-
-    private function deleteImage($imagePath)
-    {
-        if ($imagePath && Storage::exists('public/' . $imagePath)) {
-            Storage::delete('public/' . $imagePath);
-        }
     }
 }

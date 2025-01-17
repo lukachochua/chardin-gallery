@@ -3,13 +3,18 @@
 namespace App\Services;
 
 use App\Models\Artwork;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Intervention\Image\ImageManager;
 
 class ArtworkService
 {
+    protected $imageService;
+
+    public function __construct(ImageService $imageService)
+    {
+        $this->imageService = $imageService;
+    }
+
     public function create(array $data)
     {
         $data = $this->handleImage($data);
@@ -28,13 +33,7 @@ class ArtworkService
 
         return $artwork;
     }
-    /**
-     * Update an artwork with the provided data.
-     *
-     * @param  \App\Models\Artwork  $artwork
-     * @param  array  $data
-     * @return \App\Models\Artwork
-     */
+
     public function update(Artwork $artwork, array $data)
     {
         Log::info('Service data before processing:', $data);
@@ -43,8 +42,11 @@ class ArtworkService
             if ($artwork->image) {
                 Storage::disk('public')->delete($artwork->image);
             }
-            $imagePath = $data['image']->store('artworks', 'public');
-            $data['image'] = $imagePath;
+            $data['image'] = $this->imageService->handleImageUpload(
+                $data['image'],
+                'artworks',
+                1200
+            );
         }
 
         // Handle boolean fields
@@ -53,16 +55,13 @@ class ArtworkService
 
         $artwork->update($data);
 
-        // Handle categories
         if (isset($data['category_id'])) {
             $artwork->categories()->sync([$data['category_id']]);
         } elseif (isset($data['parent_id'])) {
             $artwork->categories()->sync([$data['parent_id']]);
         }
 
-        // Handle tags
         if (isset($data['tags'])) {
-            // Ensure we have an array of valid tag IDs
             $tagIds = collect($data['tags'])
                 ->filter()
                 ->map(fn($id) => (int)$id)
@@ -86,27 +85,14 @@ class ArtworkService
                 return $data;
             }
 
-            $image = $data['image'];
-            $path = $image->store('artworks', 'public');
-            $fullPath = Storage::disk('public')->path($path);
-
-            $manager = new ImageManager(
-                driver: \Intervention\Image\Drivers\Gd\Driver::class
+            $data['image'] = $this->imageService->handleImageUpload(
+                $data['image'],
+                'artworks',
+                1200
             );
-
-            $img = $manager->read($fullPath);
-
-            $img->resize(1200, null, function ($constraint) {
-                $constraint->aspectRatio(); // Maintain aspect ratio
-            });
-
-            $img->save($fullPath);
-
-            $data['image'] = $path;
 
             return $data;
         } catch (\Exception $e) {
-            // Log the error or handle it appropriately
             Log::error('Image processing failed: ' . $e->getMessage());
             throw $e;
         }
