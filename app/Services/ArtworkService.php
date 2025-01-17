@@ -5,14 +5,19 @@ namespace App\Services;
 use App\Models\Artwork;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager;
 
 class ArtworkService
 {
     protected $imageService;
+    protected $manager;
 
     public function __construct(ImageService $imageService)
     {
         $this->imageService = $imageService;
+        $this->manager = new ImageManager(
+            driver: \Intervention\Image\Drivers\Gd\Driver::class
+        );
     }
 
     public function create(array $data)
@@ -40,16 +45,16 @@ class ArtworkService
 
         if (isset($data['image'])) {
             if ($artwork->image) {
-                Storage::disk('public')->delete($artwork->image);
+                if ($artwork->image_thumbnails) {
+                    $this->imageService->deleteImages($artwork->image_thumbnails);
+                } else {
+                    Storage::disk('public')->delete($artwork->image);
+                }
             }
-            $data['image'] = $this->imageService->handleImageUpload(
-                $data['image'],
-                'artworks',
-                1200
-            );
+
+            $data = $this->handleImage($data);
         }
 
-        // Handle boolean fields
         $data['is_available'] = isset($data['is_available']) && $data['is_available'] == 1;
         $data['is_featured'] = isset($data['is_featured']) && $data['is_featured'] == 1;
 
@@ -85,11 +90,19 @@ class ArtworkService
                 return $data;
             }
 
-            $data['image'] = $this->imageService->handleImageUpload(
+            $tempImage = $this->manager->read($data['image']->path());
+            $orientation = $tempImage->width() > $tempImage->height() ? 'horizontal' : 'vertical';
+
+            $imagePaths = $this->imageService->handleImageUpload(
                 $data['image'],
                 'artworks',
-                1200
+                'artwork',
+                $orientation
             );
+
+            $data['image'] = $imagePaths['original'];
+            $data['image_thumbnails'] = $imagePaths;
+            $data['orientation'] = $orientation;
 
             return $data;
         } catch (\Exception $e) {

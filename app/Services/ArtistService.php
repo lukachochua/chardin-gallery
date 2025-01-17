@@ -18,12 +18,13 @@ class ArtistService
     public function create(array $data)
     {
         if (isset($data['profile_image'])) {
-            $data['profile_image'] = $this->imageService->handleImageUpload(
+            $imagePaths = $this->imageService->handleImageUpload(
                 $data['profile_image'],
                 'artists',
-                800,
-                800
+                'profile'
             );
+            $data['profile_image'] = $imagePaths['original'];
+            $data['profile_image_thumbnails'] = $imagePaths;
         }
 
         return Artist::create($data);
@@ -32,15 +33,17 @@ class ArtistService
     public function update(Artist $artist, array $data)
     {
         if (isset($data['profile_image'])) {
-            if ($artist->profile_image) {
-                Storage::disk('public')->delete($artist->profile_image);
+            if ($artist->profile_image_thumbnails) {
+                $this->imageService->deleteImages($artist->profile_image_thumbnails);
             }
-            $data['profile_image'] = $this->imageService->handleImageUpload(
+
+            $imagePaths = $this->imageService->handleImageUpload(
                 $data['profile_image'],
                 'artists',
-                800,
-                800
+                'profile'
             );
+            $data['profile_image'] = $imagePaths['original'];
+            $data['profile_image_thumbnails'] = $imagePaths;
         }
 
         $artist->update($data);

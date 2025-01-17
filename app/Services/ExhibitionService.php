@@ -23,54 +23,36 @@ class ExhibitionService
     public function createExhibition($data)
     {
         if (isset($data['image'])) {
-            $data['image'] = $this->imageService->handleImageUpload(
+            $imagePaths = $this->imageService->handleImageUpload(
                 $data['image'],
                 'exhibitions',
-                800,
-                600
+                'exhibition'
             );
+            $data['image'] = $imagePaths['original'];
+            $data['image_thumbnails'] = $imagePaths;
         }
 
         $data['slug'] = Str::slug($data['title']);
-
-        $exhibition = Exhibition::create($data);
-
-        if (isset($data['artists'])) {
-            $exhibition->artists()->sync($data['artists']);
-        }
-
-        if (isset($data['artworks'])) {
-            $exhibition->artworks()->sync($data['artworks']);
-        }
-
-        return $exhibition;
+        return Exhibition::create($data);
     }
 
     public function updateExhibition(Exhibition $exhibition, $data)
     {
         if (isset($data['image'])) {
-            if ($exhibition->image) {
-                Storage::disk('public')->delete($exhibition->image);
+            if ($exhibition->image_thumbnails) {
+                $this->imageService->deleteImages($exhibition->image_thumbnails);
             }
-            $data['image'] = $this->imageService->handleImageUpload(
+
+            $imagePaths = $this->imageService->handleImageUpload(
                 $data['image'],
                 'exhibitions',
-                800,
-                600
+                'exhibition'
             );
+            $data['image'] = $imagePaths['original'];
+            $data['image_thumbnails'] = $imagePaths;
         }
 
-        $exhibition->update($data);
-
-        if (isset($data['artists'])) {
-            $exhibition->artists()->sync($data['artists']);
-        }
-
-        if (isset($data['artworks'])) {
-            $exhibition->artworks()->sync($data['artworks']);
-        }
-
-        return $exhibition;
+        return $exhibition->update($data);
     }
 
     public function deleteExhibition(Exhibition $exhibition)
