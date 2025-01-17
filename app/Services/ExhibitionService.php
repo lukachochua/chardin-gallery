@@ -3,17 +3,18 @@
 namespace App\Services;
 
 use App\Models\Exhibition;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-
+use Intervention\Image\ImageManager;
 
 class ExhibitionService
 {
+
     public function getAllExhibitions()
     {
         return Exhibition::with(['artists', 'artworks'])->get();
     }
-
 
     public function createExhibition($data)
     {
@@ -35,7 +36,6 @@ class ExhibitionService
 
         return $exhibition;
     }
-
 
     public function updateExhibition(Exhibition $exhibition, $data)
     {
@@ -65,7 +65,28 @@ class ExhibitionService
 
     private function handleImageUpload($image)
     {
-        return $image->store('exhibitions', 'public');
+        try {
+            $path = $image->store('exhibitions', 'public');
+            $fullPath = Storage::disk('public')->path($path);
+
+            $manager = new ImageManager(
+                driver: \Intervention\Image\Drivers\Gd\Driver::class
+            );
+
+            $img = $manager->read($fullPath);
+
+            $img->resize(800, 600, function ($constraint) {
+                $constraint->aspectRatio();
+                $constraint->upsize();
+            });
+
+            $img->save($fullPath);
+
+            return $path;
+        } catch (\Exception $e) {
+            Log::error('Image processing failed: ' . $e->getMessage());
+            throw $e;
+        }
     }
 
     private function deleteImage($imagePath)
