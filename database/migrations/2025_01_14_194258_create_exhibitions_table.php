@@ -1,32 +1,34 @@
 <?php
 
-namespace App\Http\Requests\Admin;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use Illuminate\Foundation\Http\FormRequest;
-
-class ExhibitionRequest extends FormRequest
+return new class extends Migration
 {
-    public function authorize(): bool
+    /**
+     * Run the migrations.
+     */
+    public function up()
     {
-        return true;
+        Schema::create('exhibitions', function (Blueprint $table) {
+            $table->id();
+            $table->string('title');
+            $table->string('slug');
+            $table->text('description');
+            $table->dateTime('start_date');
+            $table->dateTime('end_date');
+            $table->string('location');
+            $table->string('image');
+            $table->timestamps();
+        });
     }
 
-    public function rules(): array
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
     {
-        $rules = [
-            'title' => 'required|string|max:255',
-            'description' => 'required|string', // Added this line
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'location' => 'required|string|max:255',
-            'artists' => 'nullable|array',
-            'artworks' => 'nullable|array',
-        ];
-
-        if ($this->hasFile('image')) {
-            $rules['image'] = 'required|image|mimes:jpeg,png,jpg,gif|max:2048';
-        }
-
-        return $rules;
+        Schema::dropIfExists('exhibitions');
     }
-}
+};
