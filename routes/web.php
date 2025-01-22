@@ -8,8 +8,11 @@ use App\Http\Controllers\Admin\ArtistController;
 use App\Http\Controllers\Admin\ArtworkController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ExhibitionController;
+use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\TagController;
 use App\Http\Controllers\ArtworkCatalogController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\PublicArtistController;
 use App\Http\Controllers\PublicExhibitionController;
 
@@ -30,37 +33,21 @@ Route::get('/artists/{artist:slug}', [PublicArtistController::class, 'show'])->n
 Route::get('/exhibitions', [PublicExhibitionController::class, 'index'])->name('exhibitions.index');
 Route::get('/exhibitions/{exhibition:slug}', [PublicExhibitionController::class, 'show'])->name('exhibitions.show');
 
-// // Public Routes
-// Route::get('/', [HomeController::class, 'index'])->name('home');
+// Shopping Cart Routes
+Route::group(['prefix' => 'cart', 'as' => 'cart.'], function () {
+    Route::get('/', [CartController::class, 'index'])->name('index');
+    Route::post('/add/{artwork}', [CartController::class, 'add'])->name('add');
+    Route::patch('/update/{cartItem}', [CartController::class, 'update'])->name('update');
+    Route::delete('/remove/{cartItem}', [CartController::class, 'remove'])->name('remove');
+});
 
-// // Gallery Routes
-// Route::group(['prefix' => 'gallery'], function () {
-//     Route::get('/', [GalleryController::class, 'index'])->name('gallery.index');
-//     Route::get('/artwork/{artwork:slug}', [GalleryController::class, 'show'])->name('gallery.show');
-//     Route::get('/category/{category:slug}', [GalleryController::class, 'category'])->name('gallery.category');
-//     Route::get('/tag/{tag:slug}', [GalleryController::class, 'tag'])->name('gallery.tag');
-// });
-
-// // Artist Public Pages
-// Route::get('/artists', [ArtistPageController::class, 'index'])->name('artists.index');
-// Route::get('/artist/{artist:slug}', [ArtistPageController::class, 'show'])->name('artists.show');
-
-// // Shopping Cart Routes
-// Route::group(['prefix' => 'cart'], function () {
-//     Route::get('/', [CartController::class, 'index'])->name('cart.index');
-//     Route::post('/add/{artwork}', [CartController::class, 'add'])->name('cart.add');
-//     Route::patch('/update/{cartItem}', [CartController::class, 'update'])->name('cart.update');
-//     Route::delete('/remove/{cartItem}', [CartController::class, 'remove'])->name('cart.remove');
-// });
-
-// // Checkout Routes
-// Route::group(['prefix' => 'checkout', 'middleware' => ['auth']], function () {
-//     Route::get('/', [CheckoutController::class, 'index'])->name('checkout.index');
-//     Route::post('/process', [CheckoutController::class, 'process'])->name('checkout.process');
-//     Route::get('/success', [CheckoutController::class, 'success'])->name('checkout.success');
-//     Route::get('/cancel', [CheckoutController::class, 'cancel'])->name('checkout.cancel');
-// });
-
+// Checkout Routes
+Route::group(['prefix' => 'checkout', 'middleware' => ['auth'], 'as' => 'checkout.'], function () {
+    Route::get('/', [CheckoutController::class, 'index'])->name('index');
+    Route::post('/process', [CheckoutController::class, 'process'])->name('process');
+    Route::get('/success', [CheckoutController::class, 'success'])->name('success');
+    Route::get('/cancel', [CheckoutController::class, 'cancel'])->name('cancel');
+});
 
 // Admin Routes
 Route::group([
@@ -116,6 +103,11 @@ Route::group([
     Route::get('exhibitions/{exhibition}/edit', [ExhibitionController::class, 'edit'])->name('exhibitions.edit');
     Route::put('exhibitions/{exhibition}', [ExhibitionController::class, 'update'])->name('exhibitions.update');
     Route::delete('exhibitions/{exhibition}', [ExhibitionController::class, 'destroy'])->name('exhibitions.destroy');
+    
+    // Order Management
+    Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::put('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
 });
 
 require __DIR__ . '/auth.php';

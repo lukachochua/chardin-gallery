@@ -8,7 +8,6 @@
     <title>{{ config('app.name', 'Chardin Gallery') }}</title>
     <link rel="icon" href="{{ asset('favicon.ico') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
 </head>
 
 <body class="bg-white">
@@ -33,8 +32,25 @@
                         class="nav-link {{ request()->routeIs('artists.*') ? 'nav-active' : '' }}">
                         Artists
                     </a>
-                    <a href="{{ route('exhibitions.index') }}" class="nav-link {{ request()->routeIs('exhibitions.*') ? 'nav-active' : '' }}">Exhibitions</a>
-                    <a href="#" class="nav-link">Shop</a>
+                    <a href="{{ route('exhibitions.index') }}"
+                        class="nav-link {{ request()->routeIs('exhibitions.*') ? 'nav-active' : '' }}">
+                        Exhibitions
+                    </a>
+                    <a href="{{ route('cart.index') }}"
+                        class="nav-link {{ request()->routeIs('cart.*') ? 'nav-active' : '' }} relative flex items-center"
+                        onclick="event.preventDefault(); window.location.href = @auth '{{ route('cart.index') }}' @else '{{ route('login') }}' @endauth">
+                        Cart
+                        @auth
+                            @php
+                                $cartCount = optional(optional(auth()->user()->cart)->items)->count() ?? 0;
+                            @endphp
+                            @if ($cartCount > 0)
+                                <span class="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">
+                                    {{ $cartCount }}
+                                </span>
+                            @endif
+                        @endauth
+                    </a>
                 </div>
 
                 <!-- Desktop Login/Register -->
@@ -83,8 +99,25 @@
                         class="block py-2 text-base font-light {{ request()->routeIs('artists.*') ? 'text-black' : 'text-gray-600' }}">
                         Artists
                     </a>
-                    <a href="#" class="block py-2 text-base font-light text-gray-600">Exhibitions</a>
-                    <a href="#" class="block py-2 text-base font-light text-gray-600">Shop</a>
+                    <a href="{{ route('exhibitions.index') }}"
+                        class="block py-2 text-base font-light {{ request()->routeIs('exhibitions.*') ? 'text-black' : 'text-gray-600' }}">
+                        Exhibitions
+                    </a>
+                    <a href="{{ route('cart.index') }}"
+                        class="block py-2 text-base font-light {{ request()->routeIs('cart.*') ? 'text-black' : 'text-gray-600' }}"
+                        onclick="event.preventDefault(); window.location.href = @auth '{{ route('cart.index') }}' @else '{{ route('login') }}' @endauth">
+                        Cart
+                        @auth
+                            @php
+                                $cartCount = optional(optional(auth()->user()->cart)->items)->count() ?? 0;
+                            @endphp
+                            @if ($cartCount > 0)
+                                <span class="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">
+                                    {{ $cartCount }}
+                                </span>
+                            @endif
+                        @endauth
+                    </a>
                     @auth
                         <a href="{{ route('admin.dashboard') }}"
                             class="block py-2 text-base font-light {{ request()->routeIs('admin.dashboard') ? 'text-black' : 'text-gray-600' }}">

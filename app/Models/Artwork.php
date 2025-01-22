@@ -73,6 +73,16 @@ class Artwork extends Model
         return $this->belongsToMany(Exhibition::class);
     }
 
+    public function cartItems()
+    {
+        return $this->hasMany(CartItem::class);
+    }
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
 
     // Scopes
     public function scopeAvailable($query)

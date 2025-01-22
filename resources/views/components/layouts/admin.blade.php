@@ -47,10 +47,13 @@
                             class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition duration-150">
                             Categories
                         </x-nav-link>
-                        <!-- Add the Exhibitions link -->
                         <x-nav-link :href="route('admin.exhibitions.index')" :active="request()->routeIs('admin.exhibitions.*')"
                             class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition duration-150">
                             Exhibitions
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.orders.index')" :active="request()->routeIs('admin.orders.*')"
+                            class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition duration-150">
+                            Orders
                         </x-nav-link>
 
                         <!-- Logout Button -->
