@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Artwork;
 use App\Models\Cart;
 use App\Models\CartItem;
 use Illuminate\Support\Facades\Auth;
@@ -20,22 +21,51 @@ class CartService
 
     public function addToCart($artworkId, $quantity = 1)
     {
-        $cart = $this->getCart();
+        DB::beginTransaction();
+        try {
+            $artwork = Artwork::findOrFail($artworkId);
+            $cart = $this->getCart();
 
-        $cartItem = $cart->items()->updateOrCreate(
-            ['artwork_id' => $artworkId],
-            ['quantity' => DB::raw("quantity + $quantity")]
-        );
+            if ($artwork->stock < $quantity) {
+                throw new \Exception('Not enough stock available');
+            }
 
-        return $cart->load('items.artwork');
+            $existingItem = $cart->items()->where('artwork_id', $artworkId)->first();
+
+            if ($existingItem) {
+                $newQuantity = $existingItem->quantity + $quantity;
+                if ($artwork->stock < $newQuantity) {
+                    throw new \Exception('Exceeds available stock');
+                }
+
+                $existingItem->update(['quantity' => $newQuantity]);
+            } else {
+                $cart->items()->create([
+                    'artwork_id' => $artworkId,
+                    'quantity' => $quantity
+                ]);
+            }
+
+            $artwork->decrement('stock', $quantity);
+
+            DB::commit();
+            return $cart->load('items.artwork');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 
-    public function removeFromCart($artworkId)
+    public function removeFromCart($cartItemId)
     {
-        $cart = $this->getCart();
-        $cart->items()->where('artwork_id', $artworkId)->delete();
+        $cartItem = CartItem::findOrFail($cartItemId);
+        $artwork = $cartItem->artwork;
 
-        return $cart->load('items.artwork');
+        $artwork->increment('stock', $cartItem->quantity);
+
+        $cartItem->delete();
+
+        return $this->getCart()->load('items.artwork');
     }
 
     public function getCartTotal()

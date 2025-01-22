@@ -12,7 +12,11 @@ use App\Models\Category;
 use App\Models\Tag;
 use App\Models\Artist;
 use App\Models\Artwork;
+use App\Models\Cart;
+use App\Models\CartItem;
 use App\Models\Exhibition;
+use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\User;
 
 class DatabaseSeeder extends Seeder
@@ -38,12 +42,14 @@ class DatabaseSeeder extends Seeder
             mkdir(storage_path('app/public/exhibitions'), 0755, true);
         }
 
-        User::create([
+        $admin = User::create([
             'name' => 'luka',
             'is_admin' => true,
             'email' => 'test@example.com',
             'password' => 'password',
         ]);
+
+        $users = User::factory()->count(5)->create();
 
         // Seed Categories with Nested Structure
         $this->seedCategories();
@@ -59,6 +65,9 @@ class DatabaseSeeder extends Seeder
 
         // Seed Exhibitions after Artists and Artworks
         $this->seedExhibitions($artists);
+
+        // Seed Carts and Orders
+        $this->seedCartsAndOrders($users, $admin);
     }
 
 
@@ -245,6 +254,77 @@ class DatabaseSeeder extends Seeder
 
                 $exhibitionModel->artworks()->attach($artworks->pluck('id'));
             }
+        }
+    }
+
+    private function seedCartsAndOrders($users, $admin): void
+    {
+        $artworks = Artwork::all();
+        $faker = \Faker\Factory::create();
+
+        // Seed carts for all users
+        foreach ($users as $user) {
+            // Create cart
+            $cart = Cart::create(['user_id' => $user->id]);
+
+            // Add 1-3 random artworks to cart
+            $cartItems = $artworks->random(rand(1, 3))->map(function ($artwork) use ($faker) {
+                return new CartItem([
+                    'artwork_id' => $artwork->id,
+                    'quantity' => $faker->numberBetween(1, 3)
+                ]);
+            });
+
+            $cart->items()->saveMany($cartItems);
+
+            // Create 1-2 orders per user
+            foreach (range(1, rand(1, 2)) as $index) {
+                $order = Order::create([
+                    'user_id' => $user->id,
+                    'status' => $faker->randomElement(['pending', 'completed', 'cancelled']),
+                    'total' => 0,
+                    'shipping_address' => $faker->address,
+                    'payment_method' => 'credit_card',
+                ]);
+
+                // Create order items from random artworks
+                $orderItems = $artworks->random(rand(1, 3))->map(function ($artwork) use ($faker) {
+                    return new OrderItem([
+                        'artwork_id' => $artwork->id,
+                        'quantity' => $faker->numberBetween(1, 3),
+                        'price' => $artwork->price
+                    ]);
+                });
+
+                $order->items()->saveMany($orderItems);
+
+                // Update order total
+                $order->update([
+                    'total' => $order->items->sum(fn($item) => $item->price * $item->quantity)
+                ]);
+            }
+        }
+
+        // Also create some orders for admin
+        foreach (range(1, 3) as $index) {
+            $order = Order::create([
+                'user_id' => $admin->id,
+                'status' => 'completed',
+                'total' => 0,
+                'shipping_address' => $faker->address,
+                'payment_method' => 'credit_card',
+            ]);
+
+            $orderItems = $artworks->random(3)->map(function ($artwork) {
+                return new OrderItem([
+                    'artwork_id' => $artwork->id,
+                    'quantity' => 1,
+                    'price' => $artwork->price
+                ]);
+            });
+
+            $order->items()->saveMany($orderItems);
+            $order->update(['total' => $order->items->sum(fn($item) => $item->price * $item->quantity)]);
         }
     }
 }

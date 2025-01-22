@@ -34,7 +34,7 @@ Route::get('/exhibitions', [PublicExhibitionController::class, 'index'])->name('
 Route::get('/exhibitions/{exhibition:slug}', [PublicExhibitionController::class, 'show'])->name('exhibitions.show');
 
 // Shopping Cart Routes
-Route::group(['prefix' => 'cart', 'as' => 'cart.'], function () {
+Route::group(['prefix' => 'cart', 'as' => 'cart.', 'middleware' => ['auth']], function () {
     Route::get('/', [CartController::class, 'index'])->name('index');
     Route::post('/add/{artwork}', [CartController::class, 'add'])->name('add');
     Route::patch('/update/{cartItem}', [CartController::class, 'update'])->name('update');
@@ -103,7 +103,7 @@ Route::group([
     Route::get('exhibitions/{exhibition}/edit', [ExhibitionController::class, 'edit'])->name('exhibitions.edit');
     Route::put('exhibitions/{exhibition}', [ExhibitionController::class, 'update'])->name('exhibitions.update');
     Route::delete('exhibitions/{exhibition}', [ExhibitionController::class, 'destroy'])->name('exhibitions.destroy');
-    
+
     // Order Management
     Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');

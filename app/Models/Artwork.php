@@ -120,4 +120,9 @@ class Artwork extends Model
 
         return $slug;
     }
+
+    public function canBeAddedToCart($quantity = 1): bool
+    {
+        return $this->is_available && $this->stock >= $quantity;
+    }
 }
