@@ -39,6 +39,7 @@ Route::group(['prefix' => 'cart', 'as' => 'cart.', 'middleware' => ['auth']], fu
     Route::post('/add/{artwork}', [CartController::class, 'add'])->name('add');
     Route::patch('/update/{cartItem}', [CartController::class, 'update'])->name('update');
     Route::delete('/remove/{cartItem}', [CartController::class, 'remove'])->name('remove');
+    Route::get('/items', [CartController::class, 'items'])->name('items');
 });
 
 // Checkout Routes

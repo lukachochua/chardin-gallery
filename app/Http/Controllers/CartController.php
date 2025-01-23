@@ -67,4 +67,27 @@ class CartController extends Controller
         $this->cartService->removeFromCart($cartItemId);
         return redirect()->back()->with('success', 'Item removed from cart');
     }
+
+    public function items()
+    {
+        $cart = auth()->user()->cart()->with(['items.artwork.artist'])->first();
+
+        return response()->json([
+            'items' => $cart ? $cart->items->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'quantity' => $item->quantity,
+                    'artwork' => [
+                        'title' => $item->artwork->title,
+                        'price' => $item->artwork->price,
+                        'image' => asset('storage/' . $item->artwork->image),
+                        'artist' => [
+                            'name' => $item->artwork->artist->name
+                        ]
+                    ]
+                ];
+            }) : [],
+            'totalQuantity' => $cart ? $cart->items->sum('quantity') : 0
+        ]);
+    }
 }
