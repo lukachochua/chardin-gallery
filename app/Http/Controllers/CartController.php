@@ -22,14 +22,22 @@ class CartController extends Controller
         return view('cart.index', compact('cart'));
     }
 
-    public function add(Request $request, Artwork $artwork)
+    public function add(Artwork $artwork, Request $request)
     {
-        try {
-            $this->cartService->addToCart($artwork->id, $request->quantity);
-            return redirect()->back()->with('success', 'Item added to cart');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', $e->getMessage());
-        }
+        $request->validate([
+            'quantity' => 'required|integer|min:1'
+        ]);
+
+        $cart = auth()->user()->cart()->firstOrCreate();
+        $cart->items()->updateOrCreate(
+            ['artwork_id' => $artwork->id],
+            ['quantity' => $request->quantity]
+        );
+
+        return response()->json([
+            'message' => 'Artwork added to cart successfully',
+            'cart_count' => $cart->items()->count()
+        ]);
     }
 
     public function update(Request $request, CartItem $item)
