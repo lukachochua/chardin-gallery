@@ -27,30 +27,26 @@
                         </div>
                         <div>
                             <p class="text-sm text-gray-500">Status</p>
-                            <form method="POST" action="{{ route('admin.orders.update-status', $order) }}"
-                                class="mt-2">
+                            <form method="POST" action="{{ route('admin.orders.update-status', $order) }}">
                                 @csrf
                                 @method('PUT')
                                 <select name="status" onchange="this.form.submit()"
-                                    class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    class="px-3 py-2 rounded-md shadow-sm focus:ring focus:ring-opacity-50 w-full pr-8
+                                        {{ $order->status === 'pending'
+                                            ? 'bg-yellow-100 text-yellow-800 focus:ring-yellow-200'
+                                            : ($order->status === 'processing'
+                                                ? 'bg-blue-100 text-blue-800 focus:ring-blue-200'
+                                                : ($order->status === 'shipped'
+                                                    ? 'bg-indigo-100 text-indigo-800 focus:ring-indigo-200'
+                                                    : ($order->status === 'completed'
+                                                        ? 'bg-green-100 text-green-800 focus:ring-green-200'
+                                                        : ($order->status === 'cancelled'
+                                                            ? 'bg-red-100 text-red-800 focus:ring-red-200'
+                                                            : 'bg-gray-100 text-gray-800 focus:ring-gray-200')))) }}">
                                     @foreach (['pending', 'processing', 'shipped', 'completed', 'cancelled'] as $status)
                                         <option value="{{ $status }}"
                                             {{ $order->status === $status ? 'selected' : '' }}>
-                                            <span
-                                                class="
-                                                {{ $status === 'pending'
-                                                    ? 'text-yellow-800 bg-yellow-100'
-                                                    : ($status === 'processing'
-                                                        ? 'text-blue-800 bg-blue-100'
-                                                        : ($status === 'shipped'
-                                                            ? 'text-indigo-800 bg-indigo-100'
-                                                            : ($status === 'completed'
-                                                                ? 'text-green-800 bg-green-100'
-                                                                : ($status === 'cancelled'
-                                                                    ? 'text-red-800 bg-red-100'
-                                                                    : '')))) }}">
-                                                {{ ucfirst($status) }}
-                                            </span>
+                                            {{ ucfirst($status) }}
                                         </option>
                                     @endforeach
                                 </select>
