@@ -25,47 +25,57 @@
                 <!-- Desktop Navigation -->
                 <div class="hidden md:flex md:items-center md:space-x-8">
                     <a href="{{ route('artworks.index') }}"
-                        class="nav-link {{ request()->routeIs('artworks.*') ? 'nav-active' : '' }}">
+                        class="nav-link px-4 py-2 hover:bg-gray-100 {{ request()->routeIs('artworks.*') ? 'nav-active' : '' }}">
                         Artworks
                     </a>
                     <a href="{{ route('artists.index') }}"
-                        class="nav-link {{ request()->routeIs('artists.*') ? 'nav-active' : '' }}">
+                        class="nav-link px-4 py-2 hover:bg-gray-100 {{ request()->routeIs('artists.*') ? 'nav-active' : '' }}">
                         Artists
                     </a>
                     <a href="{{ route('exhibitions.index') }}"
-                        class="nav-link {{ request()->routeIs('exhibitions.*') ? 'nav-active' : '' }}">
+                        class="nav-link px-4 py-2 hover:bg-gray-100 {{ request()->routeIs('exhibitions.*') ? 'nav-active' : '' }}">
                         Exhibitions
-                    </a>
-                    <a href="{{ route('cart.index') }}"
-                        class="nav-link {{ request()->routeIs('cart.*') ? 'nav-active' : '' }} relative flex items-center"
-                        onclick="event.preventDefault(); window.location.href = @auth '{{ route('cart.index') }}' @else '{{ route('login') }}' @endauth">
-                        Cart
-                        @auth
-                            @php
-                                $cartCount = optional(optional(auth()->user()->cart)->items)->count() ?? 0;
-                            @endphp
-                            @if ($cartCount > 0)
-                                <span class="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">
-                                    {{ $cartCount }}
-                                </span>
-                            @endif
-                        @endauth
                     </a>
                 </div>
 
-                <!-- Desktop Login/Register -->
-                <div class="hidden md:flex md:items-center md:space-x-6">
+                <!-- Desktop Auth + Cart/Dashboard -->
+                <div class="hidden md:flex md:items-center md:space-x-4">
                     @auth
-                        <a href="{{ route('admin.dashboard') }}"
-                            class="nav-link {{ request()->routeIs('admin.dashboard') ? 'nav-active' : '' }}">
-                            Dashboard
-                        </a>
+                        @if (auth()->user()->is_admin)
+                            <a href="{{ route('admin.dashboard') }}"
+                                class="nav-link px-4 py-2 hover:bg-gray-100 {{ request()->routeIs('admin.dashboard') ? 'nav-active' : '' }}">
+                                Dashboard
+                            </a>
+                        @else
+                            @php
+                                $cartCount = optional(optional(auth()->user()->cart)->items)->count() ?? 0;
+                            @endphp
+                            <a href="{{ route('cart.index') }}" class="relative px-4 py-2 hover:bg-gray-100">
+                                <div class="relative">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                                        </path>
+                                    </svg>
+                                    <span
+                                        class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center border-2 border-white cart-count"
+                                        style="display: {{ $cartCount > 0 ? 'flex' : 'none' }}"
+                                        x-text="{{ $cartCount }}"
+                                        @cart-updated.window="
+                                            $el.textContent = $event.detail.cartCount;
+                                            $el.style.display = $event.detail.cartCount > 0 ? 'flex' : 'none';
+                                        ">
+                                        {{ $cartCount }}
+                                    </span>
+                                </div>
+                            </a>
+                        @endif
                         <form action="{{ route('logout') }}" method="POST" class="inline">
                             @csrf
-                            <button type="submit" class="nav-link">Logout</button>
+                            <button type="submit" class="nav-link px-4 py-2 hover:bg-gray-100">Logout</button>
                         </form>
                     @else
-                        <a href="{{ route('login') }}" class="nav-link">Login</a>
+                        <a href="{{ route('login') }}" class="nav-link px-4 py-2 hover:bg-gray-100">Login</a>
                         <a href="{{ route('register') }}"
                             class="px-4 py-2 text-sm font-medium text-white bg-black hover:bg-gray-800 transition-smooth">
                             Register
@@ -75,7 +85,7 @@
 
                 <!-- Mobile Menu Button -->
                 <div class="md:hidden">
-                    <button type="button" class="text-black hover:text-gray-600 focus:outline-none"
+                    <button type="button" class="text-black hover:text-gray-600 focus:outline-none p-2"
                         aria-label="Toggle menu" @click="open = !open">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -92,45 +102,57 @@
                 x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1">
                 <div class="px-2 pt-2 pb-3 space-y-1">
                     <a href="{{ route('artworks.index') }}"
-                        class="block py-2 text-base font-light {{ request()->routeIs('artworks.*') ? 'text-black' : 'text-gray-600' }}">
+                        class="block py-2 px-4 hover:bg-gray-100 {{ request()->routeIs('artworks.*') ? 'text-black' : 'text-gray-600' }}">
                         Artworks
                     </a>
                     <a href="{{ route('artists.index') }}"
-                        class="block py-2 text-base font-light {{ request()->routeIs('artists.*') ? 'text-black' : 'text-gray-600' }}">
+                        class="block py-2 px-4 hover:bg-gray-100 {{ request()->routeIs('artists.*') ? 'text-black' : 'text-gray-600' }}">
                         Artists
                     </a>
                     <a href="{{ route('exhibitions.index') }}"
-                        class="block py-2 text-base font-light {{ request()->routeIs('exhibitions.*') ? 'text-black' : 'text-gray-600' }}">
+                        class="block py-2 px-4 hover:bg-gray-100 {{ request()->routeIs('exhibitions.*') ? 'text-black' : 'text-gray-600' }}">
                         Exhibitions
                     </a>
-                    <a href="{{ route('cart.index') }}"
-                        class="block py-2 text-base font-light {{ request()->routeIs('cart.*') ? 'text-black' : 'text-gray-600' }}"
-                        onclick="event.preventDefault(); window.location.href = @auth '{{ route('cart.index') }}' @else '{{ route('login') }}' @endauth">
-                        Cart
-                        @auth
+
+                    @auth
+                        @if (auth()->user()->is_admin)
+                            <a href="{{ route('admin.dashboard') }}"
+                                class="block py-2 px-4 hover:bg-gray-100 {{ request()->routeIs('admin.dashboard') ? 'text-black' : 'text-gray-600' }}">
+                                Dashboard
+                            </a>
+                        @else
                             @php
                                 $cartCount = optional(optional(auth()->user()->cart)->items)->count() ?? 0;
                             @endphp
-                            @if ($cartCount > 0)
-                                <span class="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">
-                                    {{ $cartCount }}
-                                </span>
-                            @endif
-                        @endauth
-                    </a>
-                    @auth
-                        <a href="{{ route('admin.dashboard') }}"
-                            class="block py-2 text-base font-light {{ request()->routeIs('admin.dashboard') ? 'text-black' : 'text-gray-600' }}">
-                            Dashboard
-                        </a>
+                            <a href="{{ route('cart.index') }}"
+                                class="block py-2 px-4 hover:bg-gray-100 items-center">
+                                <div class="relative mr-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                                        </path>
+                                    </svg>
+                                    <span
+                                        class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center border-2 border-white cart-count"
+                                        style="display: {{ $cartCount > 0 ? 'flex' : 'none' }}"
+                                        x-text="{{ $cartCount }}"
+                                        @cart-updated.window="
+                                            $el.textContent = $event.detail.cartCount;
+                                            $el.style.display = $event.detail.cartCount > 0 ? 'flex' : 'none';
+                                        ">
+                                        {{ $cartCount }}
+                                    </span>
+                                </div>
+                            </a>
+                        @endif
                         <form action="{{ route('logout') }}" method="POST">
                             @csrf
-                            <button type="submit" class="block w-full text-left py-2 text-base font-light text-gray-600">
+                            <button type="submit" class="block w-full text-left py-2 px-4 hover:bg-gray-100 text-gray-600">
                                 Logout
                             </button>
                         </form>
                     @else
-                        <a href="{{ route('login') }}" class="block py-2 text-base font-light text-gray-600">Login</a>
+                        <a href="{{ route('login') }}" class="block py-2 px-4 hover:bg-gray-100 text-gray-600">Login</a>
                         <a href="{{ route('register') }}"
                             class="block mt-2 px-4 py-2 text-base font-light text-white bg-black text-center">
                             Register

@@ -16,6 +16,11 @@ export default {
             },
         },
     },
-
+    variants: {
+        extend: {
+            backdropBlur: ['responsive'],
+            backdropFilter: ['responsive'],
+        }
+    },
     plugins: [forms],
 };
