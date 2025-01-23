@@ -35,16 +35,43 @@
                     </div>
 
                     @if ($artwork->is_available)
-                        <!-- Add to Cart Form -->
-                        <form action="{{ route('cart.add', $artwork) }}" method="POST" x-data="{ submitting: false }"
-                            @submit.prevent="submitting = true; $event.target.submit()">
-                            @csrf
+                        <!-- Updated Add to Cart Form -->
+                        <div x-data="{ submitting: false, quantity: 1 }" class="pt-6 border-t border-gray-200">
                             <div class="flex items-center gap-4">
-                                <input type="number" name="quantity" value="1" min="1"
-                                    max="{{ $artwork->stock }}"
+                                <input type="number" x-model="quantity" min="1" max="{{ $artwork->stock }}"
                                     class="w-20 px-3 py-2 border border-gray-300 rounded-md text-center"
                                     :disabled="submitting">
-                                <button type="submit"
+                                <button
+                                    @click.prevent="
+                                        submitting = true;
+                                        fetch('{{ route('cart.add', $artwork) }}', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                'Accept': 'application/json'
+                                            },
+                                            body: JSON.stringify({ quantity: quantity })
+                                        })
+                                        .then(response => {
+                                            if (!response.ok) throw new Error('Failed to add item');
+                                            return response.json();
+                                        })
+                                        .then(data => {
+                                            $dispatch('cart-updated', { 
+                                                message: data.message,
+                                                cartCount: data.cart_count
+                                            });
+                                            document.querySelectorAll('.cart-count').forEach(el => {
+                                                el.textContent = data.cart_count;
+                                                el.style.display = data.cart_count > 0 ? 'flex' : 'none';
+                                            });
+                                        })
+                                        .catch(error => {
+                                            $dispatch('cart-updated', { message: error.message });
+                                        })
+                                        .finally(() => submitting = false);
+                                    "
                                     class="flex-1 px-8 py-3 bg-black text-white text-sm hover:bg-gray-800 transition-all"
                                     :disabled="submitting">
                                     <span x-show="!submitting">Add to Cart</span>
@@ -60,7 +87,7 @@
                                     </span>
                                 </button>
                             </div>
-                        </form>
+                        </div>
                     @else
                         <p class="pt-6 text-gray-500">Currently unavailable</p>
                     @endif

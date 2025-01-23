@@ -11,6 +11,7 @@
 </head>
 
 <body class="bg-white">
+
     <nav class="navbar shadow-sm" x-data="{ open: false }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center">
@@ -22,6 +23,18 @@
                     </a>
                 </div>
 
+                <!-- Toast Notification -->
+                <div class="fixed top-4 right-4 z-50" x-data="{ show: false, message: '' }" x-show="show"
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 transform translate-y-2"
+                    x-transition:enter-end="opacity-100 transform translate-y-0"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100 transform translate-y-0"
+                    x-transition:leave-end="opacity-0 transform translate-y-2"
+                    @cart-updated.window="show = true; message = $event.detail.message; setTimeout(() => show = false, 3000)">
+                    <div class="bg-green-500 text-white px-4 py-2 rounded-md shadow-lg" x-text="message"></div>
+                </div>
+                
                 <!-- Desktop Navigation -->
                 <div class="hidden md:flex md:items-center md:space-x-8">
                     <a href="{{ route('artworks.index') }}"
@@ -124,8 +137,7 @@
                             @php
                                 $cartCount = optional(optional(auth()->user()->cart)->items)->count() ?? 0;
                             @endphp
-                            <a href="{{ route('cart.index') }}"
-                                class="block py-2 px-4 hover:bg-gray-100 items-center">
+                            <a href="{{ route('cart.index') }}" class="block py-2 px-4 hover:bg-gray-100 items-center">
                                 <div class="relative mr-2">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -147,7 +159,8 @@
                         @endif
                         <form action="{{ route('logout') }}" method="POST">
                             @csrf
-                            <button type="submit" class="block w-full text-left py-2 px-4 hover:bg-gray-100 text-gray-600">
+                            <button type="submit"
+                                class="block w-full text-left py-2 px-4 hover:bg-gray-100 text-gray-600">
                                 Logout
                             </button>
                         </form>
