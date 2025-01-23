@@ -86,7 +86,7 @@
                                                     body: JSON.stringify({ quantity: 1 })
                                                 })
                                                 .then(response => {
-                                                    if (!response.ok) throw new Error('Failed to add item');
+                                                    if (!response.ok) throw new Error('Failed to add item, Please log in!');
                                                     return response.json();
                                                 })
                                                 .then(data => {
