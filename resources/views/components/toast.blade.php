@@ -1,4 +1,4 @@
-<div x-data="{ show: false, message: '', isError: false }" x-show="show" x-transition:enter="transition transform ease-out duration-300"
+<div x-data="{ show: false, message: '', isError: false }" x-show="show" x-cloak x-transition:enter="transition transform ease-out duration-300"
     x-transition:enter-start="translate-y-4 opacity-0 sm:translate-y-0 sm:translate-x-2"
     x-transition:enter-end="translate-y-0 opacity-100 sm:translate-x-0"
     x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
