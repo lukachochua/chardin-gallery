@@ -62,10 +62,28 @@ class CartController extends Controller
         }
     }
 
-    public function remove($cartItemId)
+    public function remove(Request $request, $cartItemId)
     {
-        $this->cartService->removeFromCart($cartItemId);
-        return redirect()->back()->with('success', 'Item removed from cart');
+        try {
+            $this->cartService->removeFromCart($cartItemId);
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'message' => 'Item removed successfully',
+                    'cart_count' => auth()->user()->cart->items->count()
+                ]);
+            }
+
+            return redirect()->route('cart.index')
+                ->with('success', 'Item removed from cart');
+        } catch (\Exception $e) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'error' => $e->getMessage()
+                ], 500);
+            }
+            return redirect()->back()->with('error', $e->getMessage());
+        }
     }
 
     public function items()
