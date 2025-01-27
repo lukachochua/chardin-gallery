@@ -44,3 +44,15 @@
         background: rgba(255, 255, 255, 0.8);
     }
 }
+
+[x-cloak] {
+    display: none !important;
+}
+
+.transition-smooth {
+    transition: all 0.3s ease-in-out;
+}
+
+.cart-count {
+    transition: opacity 0.2s ease;
+}

@@ -5,6 +5,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="cart-items-route" content="{{ route('cart.items') }}">
+    <meta name="cart-remove-route" content="{{ route('cart.remove', ['cartItem' => 'CART_ITEM_ID']) }}">
     <title>{{ config('app.name', 'Chardin Gallery') }}</title>
     <link rel="icon" href="{{ asset('favicon.ico') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -62,43 +64,7 @@
                             @php
                                 $cartCount = optional(optional(auth()->user()->cart)->items)->sum('quantity') ?? 0;
                             @endphp
-                            <div class="relative" x-data="{
-                                cartOpen: false,
-                                cartItems: [],
-                                loading: false,
-                                cartCount: {{ $cartCount }},
-                                closeTimeout: null,
-                            
-                                async loadCart() {
-                                    this.loading = true;
-                                    try {
-                                        const response = await fetch('{{ route('cart.items') }}');
-                                        const data = await response.json();
-                                        this.cartItems = data.items;
-                                        this.cartCount = data.totalQuantity;
-                                    } catch (error) {
-                                        console.error('Cart load failed:', error);
-                                    } finally {
-                                        this.loading = false;
-                                    }
-                                },
-                            
-                                openCart() {
-                                    clearTimeout(this.closeTimeout);
-                                    if (!this.cartOpen) this.loadCart();
-                                    this.cartOpen = true;
-                                },
-                            
-                                closeCart() {
-                                    this.closeTimeout = setTimeout(() => {
-                                        this.cartOpen = false;
-                                    }, 300);
-                                },
-                            
-                                cancelClose() {
-                                    clearTimeout(this.closeTimeout);
-                                }
-                            }" @cart-updated.window="loadCart()">
+                            <div class="relative" x-data="cart({{ $cartCount }})" x-cloak>
                                 <div @mouseenter="openCart()" @mouseleave="closeCart()" class="relative">
                                     <button class="px-4 py-2 hover:bg-gray-100">
                                         <div class="relative">
@@ -116,12 +82,7 @@
 
                                     <!-- Cart Dropdown -->
                                     <div class="absolute right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50"
-                                        x-show="cartOpen" x-transition:enter="transition ease-out duration-200"
-                                        x-transition:enter-start="opacity-0 translate-y-1"
-                                        x-transition:enter-end="opacity-100 translate-y-0"
-                                        x-transition:leave="transition ease-in duration-150"
-                                        x-transition:leave-start="opacity-100 translate-y-0"
-                                        x-transition:leave-end="opacity-0 translate-y-1" @mouseenter="cancelClose()"
+                                        x-show="cartOpen" x-transition x-cloak @mouseenter="cancelClose()"
                                         @mouseleave="closeCart()">
                                         <div class="p-4">
                                             <h3 class="text-lg font-light mb-4">Your Cart</h3>
@@ -162,33 +123,7 @@
                                                                             <div class="text-sm">
                                                                                 <span
                                                                                     x-text="`Qty: ${item.quantity}`"></span>
-                                                                                <button
-                                                                                    @click.prevent="
-                                                                                    fetch(`/cart/remove/${item.id}`, {
-                                                                                        method: 'DELETE',
-                                                                                        headers: {
-                                                                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                                                                            'Accept': 'application/json'
-                                                                                        }
-                                                                                    })
-                                                                                    .then(response => {
-                                                                                        if (!response.ok) throw Error(response.statusText);
-                                                                                        return response.json();
-                                                                                    })
-                                                                                    .then(data => {
-                                                                                        cartItems = cartItems.filter(i => i.id !== item.id);
-                                                                                        cartCount = data.cart_count;
-                                                                                        window.dispatchEvent(new CustomEvent('cart-updated', {
-                                                                                            detail: { 
-                                                                                                message: data.message,
-                                                                                                cartCount: data.cart_count
-                                                                                            }
-                                                                                        }));
-                                                                                    })
-                                                                                    .catch(error => {
-                                                                                        console.error('Error:', error);
-                                                                                        alert('Failed to remove item: ' + error.message);
-                                                                                    })"
+                                                                                <button @click.prevent="removeItem(item.id)"
                                                                                     class="text-red-500 hover:text-red-700 ml-2">
                                                                                     Remove
                                                                                 </button>
@@ -278,10 +213,9 @@
                                     <span
                                         class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center border-2 border-white cart-count"
                                         style="display: {{ $cartCount > 0 ? 'flex' : 'none' }}"
-                                        x-text="{{ $cartCount }}"
                                         @cart-updated.window="
-                                            $el.textContent = $event.detail.cartCount;
                                             $el.style.display = $event.detail.cartCount > 0 ? 'flex' : 'none';
+                                            $el.textContent = $event.detail.cartCount;
                                         ">
                                         {{ $cartCount }}
                                     </span>
