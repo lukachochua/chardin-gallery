@@ -11,6 +11,11 @@ document.addEventListener('alpine:init', () => {
         init() {
             this.cartItemsRoute = document.querySelector('meta[name="cart-items-route"]').content;
             this.cartRemoveRouteTemplate = document.querySelector('meta[name="cart-remove-route"]').content;
+
+            window.addEventListener('cart-updated', (event) => {
+                this.cartCount = event.detail.cartCount;
+                this.loadCart();
+            });
         },
 
         async loadCart() {
@@ -70,6 +75,38 @@ document.addEventListener('alpine:init', () => {
                 console.error('Error:', error);
                 alert('Failed to remove item: ' + error.message);
             }
+        },
+        
+        async addToCart(artworkId, quantity = 1) {
+            try {
+                const response = await fetch(`/cart/add/${artworkId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ quantity })
+                });
+
+                if (!response.ok) throw new Error(response.statusText);
+
+                const data = await response.json();
+
+                // Dispatch the same event used in removeItem
+                window.dispatchEvent(new CustomEvent('cart-updated', {
+                    detail: {
+                        message: data.message,
+                        cartCount: data.cart_count
+                    }
+                }));
+
+                this.loadCart(); // Reload cart items
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to add item: ' + error.message);
+            }
         }
     }));
+
 });
