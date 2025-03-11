@@ -93,7 +93,7 @@ class ArtworkController extends Controller
      */
     public function destroy(Artwork $artwork)
     {
-        if ($artwork->image) {
+        if ($artwork->image && Storage::disk('public')->exists($artwork->image)) {
             Storage::disk('public')->delete($artwork->image);
         }
 

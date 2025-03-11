@@ -27,11 +27,44 @@ class CheckoutController extends Controller
 
     public function process(Request $request)
     {
-        // Process payment and create order
-        $order = $this->orderService->createOrderFromCart($request->all());
-
-        return redirect()->route('checkout.success', $order);
+        // Validate the checkout request.
+        $request->validate([
+            'payment_method' => 'required|in:tbc,bog',
+            'amount'         => 'required|numeric|min:0.01',
+            // Add validations for customer details if needed.
+        ]);
+    
+        $paymentMethod = $request->input('payment_method');
+    
+        // Prepare payment data.
+        $paymentData = [
+            'order_id'       => uniqid('order_', true),  // Generate a unique order ID.
+            'amount'         => $request->input('amount'),
+            'currency'       => 'GEL',
+            'description'    => 'Payment for Order ' . uniqid(),
+            'success_url'    => route('checkout.success'),
+            'fail_url'       => route('checkout.cancel'),
+            'customer_email' => $request->input('email', ''),
+            'customer_phone' => $request->input('phone', ''),
+        ];
+    
+        $paymentService = new \App\Services\PaymentService();
+    
+        try {
+            // Create a payment session and get the payment link.
+            $paymentResponse = $paymentService->charge($paymentMethod, $paymentData);
+    
+            if (isset($paymentResponse['paymentLink'])) {
+                // Redirect the customer to the TBC (or BOG) payment page.
+                return redirect()->away($paymentResponse['paymentLink']);
+            } else {
+                throw new \Exception('No payment link provided.');
+            }
+        } catch (\Exception $e) {
+            return redirect()->route('checkout.cancel')->with('error', $e->getMessage());
+        }
     }
+
 
     public function success(Order $order)
     {

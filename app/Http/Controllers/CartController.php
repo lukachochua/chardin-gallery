@@ -47,20 +47,27 @@ class CartController extends Controller
                 'quantity' => 'required|numeric|min:1'
             ]);
 
-            $difference = $validated['quantity'] - $item->quantity;
+            $newQuantity = $validated['quantity'];
+            $oldQuantity = $item->quantity;
+            $difference = $newQuantity - $oldQuantity;
 
-            if ($item->artwork->stock < $difference) {
-                throw new \Exception('Not enough stock available');
+            if ($difference > 0) {
+                if ($item->artwork->stock < $difference) {
+                    throw new \Exception('Not enough stock available');
+                }
+                $item->artwork->decrement('stock', $difference);
+            } elseif ($difference < 0) {
+                $item->artwork->increment('stock', abs($difference));
             }
 
-            $item->artwork->decrement('stock', $difference);
-            $item->update(['quantity' => $validated['quantity']]);
+            $item->update(['quantity' => $newQuantity]);
 
             return redirect()->back()->with('success', 'Cart updated successfully');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
+
 
     public function remove(Request $request, $cartItemId)
     {

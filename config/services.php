@@ -35,4 +35,15 @@ return [
         ],
     ],
 
+    'tbc' => [
+        'endpoint' => env('TBC_ENDPOINT', 'https://checkout.tbcbank.ge/api/checkout/v1/transactions'),
+        'api_key'  => env('TBC_API_KEY', '52cN0JRKWtG4hjYMFWd2Ahsv7bOXGzOE'),
+        'app_id'   => env('TBC_APP_ID', '6e86edd7-7231-4322-9f08-6486e24674c1'),
+    ],
+
+    'bog' => [
+        'endpoint' => env('BOG_ENDPOINT', 'https://api.bog.com/payment'), // Update this URL per official docs
+        'api_key'  => env('BOG_API_KEY', 'your_bog_api_key_here'),
+    ],
+
 ];

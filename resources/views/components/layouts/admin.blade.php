@@ -35,26 +35,31 @@
                             class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition duration-150">
                             Dashboard
                         </x-responsive-nav-link>
-                     {{--    <x-nav-link :href="route('admin.artists.index')" :active="request()->routeIs('admin.artists.*')"
+                        <x-responsive-nav-link :href="route('admin.artists.index')" :active="request()->routeIs('admin.artists.*')"
                             class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition duration-150">
                             Artists
-                        </x-nav-link>
-                        <x-nav-link :href="route('admin.artworks.index')" :active="request()->routeIs('admin.artworks.*')"
+                        </x-responsive-nav-link>
+
+                        <x-responsive-nav-link :href="route('admin.artworks.index')" :active="request()->routeIs('admin.artworks.*')"
                             class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition duration-150">
                             Artworks
-                        </x-nav-link>
-                        <x-nav-link :href="route('admin.categories.index')" :active="request()->routeIs('admin.categories.*')"
+                        </x-responsive-nav-link>
+
+                        <x-responsive-nav-link :href="route('admin.categories.index')" :active="request()->routeIs('admin.categories.*')"
                             class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition duration-150">
                             Categories
-                        </x-nav-link>
-                        <x-nav-link :href="route('admin.exhibitions.index')" :active="request()->routeIs('admin.exhibitions.*')"
+                        </x-responsive-nav-link>
+
+                        <x-responsive-nav-link :href="route('admin.exhibitions.index')" :active="request()->routeIs('admin.exhibitions.*')"
                             class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition duration-150">
                             Exhibitions
-                        </x-nav-link>
-                        <x-nav-link :href="route('admin.orders.index')" :active="request()->routeIs('admin.orders.*')"
+                        </x-responsive-nav-link>
+
+                        <x-responsive-nav-link :href="route('admin.orders.index')" :active="request()->routeIs('admin.orders.*')"
                             class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition duration-150">
                             Orders
-                        </x-nav-link> --}}
+                        </x-responsive-nav-link>
+
 
                         <!-- Logout Button -->
                         <div class="flex items-center h-full ml-4 border-l border-gray-200 pl-4">
