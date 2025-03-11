@@ -66,8 +66,6 @@ class CheckoutController extends Controller
         }
     }
 
-
-
     public function success(Order $order)
     {
         return view('checkout.success', compact('order'));

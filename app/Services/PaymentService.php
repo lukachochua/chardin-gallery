@@ -67,9 +67,20 @@ class PaymentService
             ],
         ];
 
+        // Create a custom Guzzle client with specific SSL configuration
+        $sslClient = new Client([
+            'curl' => [
+                CURLOPT_SSLVERSION => CURL_SSLVERSION_TLSv1_3, // Force TLS 1.3
+                CURLOPT_SSL_VERIFYHOST => 2,
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_CIPHER_LIST => 'HIGH:!aNULL:!MD5',  // Use only high security ciphers
+            ],
+            'verify' => true,  // Verify SSL certificate
+        ]);
+
         try {
-            // Guzzle HTTP request to TBC API
-            $response = $this->client->post($this->tbcEndpoint, [
+            // Use the custom SSL client for this request
+            $response = $sslClient->post($this->tbcEndpoint, [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $this->tbcApiKey,
                     'X-App-Id'      => $this->tbcAppId,
@@ -77,11 +88,6 @@ class PaymentService
                     'Accept'        => 'application/json',
                 ],
                 'json' => $payload,
-                'curl' => [
-                    CURLOPT_SSLVERSION => CURL_SSLVERSION_TLSv1_2, // Force TLS 1.2 or TLS 1.3 for secure communication
-                    CURLOPT_SSL_VERIFYHOST => 2, // Ensure SSL verification
-                    CURLOPT_SSL_VERIFYPEER => true, // Enable SSL peer verification
-                ]
             ]);
 
             $result = json_decode($response->getBody(), true);
@@ -94,6 +100,13 @@ class PaymentService
         } catch (RequestException $e) {
             $response = $e->getResponse();
             $message = $response ? $response->getBody()->getContents() : $e->getMessage();
+
+            // Log more detailed SSL information if available
+            if (strpos($e->getMessage(), 'SSL') !== false || strpos($e->getMessage(), 'TLS') !== false) {
+                throw new Exception('TBC Payment SSL Exception: ' . $message .
+                    '. Please check SSL/TLS configuration.');
+            }
+
             throw new Exception('TBC Payment Exception: ' . $message);
         } catch (Exception $e) {
             throw new Exception('TBC Payment Exception: ' . $e->getMessage());
@@ -102,7 +115,7 @@ class PaymentService
 
     /**
      * Process payment via BOG.
-     * (This is a placeholder – adjust it using BOG’s official documentation.)
+     * (This is a placeholder – adjust it using BOG's official documentation.)
      */
     protected function chargeBOG(array $paymentData): array
     {
