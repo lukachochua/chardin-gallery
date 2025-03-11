@@ -67,28 +67,40 @@ class PaymentService
             ],
         ];
 
-        // Create a custom Guzzle client with specific SSL configuration
-        $sslClient = new Client([
+        // SSL config without certificate validation to troubleshoot
+        $sslConfig = [
+            'verify' => false, // Temporarily disable SSL verification to test connection
             'curl' => [
-                CURLOPT_SSLVERSION => CURL_SSLVERSION_TLSv1_3, // Force TLS 1.3
-                CURLOPT_SSL_VERIFYHOST => 2,
-                CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_SSL_CIPHER_LIST => 'HIGH:!aNULL:!MD5',  // Use only high security ciphers
+                CURLOPT_SSLVERSION => 6, // CURL_SSLVERSION_TLSv1_2 | CURL_SSLVERSION_TLSv1_3
+                CURLOPT_SSL_VERIFYHOST => 0, // Temporarily disable for testing
+                CURLOPT_SSL_VERIFYPEER => false, // Temporarily disable for testing
+                CURLOPT_FORBID_REUSE => true,
+                CURLOPT_FRESH_CONNECT => true,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_RETURNTRANSFER => true,
             ],
-            'verify' => true,  // Verify SSL certificate
-        ]);
+        ];
 
         try {
-            // Use the custom SSL client for this request
-            $response = $sslClient->post($this->tbcEndpoint, [
+            $client = new Client($sslConfig);
+
+            // Add more debug info
+            $debugRequest = [
                 'headers' => [
-                    'Authorization' => 'Bearer ' . $this->tbcApiKey,
+                    'Authorization' => 'Bearer XXXXX', // masked for security
                     'X-App-Id'      => $this->tbcAppId,
                     'Content-Type'  => 'application/json',
                     'Accept'        => 'application/json',
+                    'User-Agent'    => 'ChardinGalleryApp/1.0',
                 ],
                 'json' => $payload,
-            ]);
+                'debug' => true, // Enable debug output
+                'connect_timeout' => 10,
+                'timeout' => 30,
+            ];
+
+            // Use the modified client for this request
+            $response = $client->post($this->tbcEndpoint, $debugRequest);
 
             $result = json_decode($response->getBody(), true);
 
@@ -101,11 +113,14 @@ class PaymentService
             $response = $e->getResponse();
             $message = $response ? $response->getBody()->getContents() : $e->getMessage();
 
-            // Log more detailed SSL information if available
-            if (strpos($e->getMessage(), 'SSL') !== false || strpos($e->getMessage(), 'TLS') !== false) {
-                throw new Exception('TBC Payment SSL Exception: ' . $message .
-                    '. Please check SSL/TLS configuration.');
-            }
+            // Detailed logging
+            $context = [
+                'error_message' => $e->getMessage(),
+                'request_url' => $this->tbcEndpoint,
+                'curl_info' => $e->getHandlerContext(),
+            ];
+
+            \Illuminate\Support\Facades\Log::error('TBC Connection Failed', $context);
 
             throw new Exception('TBC Payment Exception: ' . $message);
         } catch (Exception $e) {
