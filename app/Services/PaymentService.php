@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Exception;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 
 class PaymentService
 {
@@ -17,11 +18,10 @@ class PaymentService
     public function __construct()
     {
         $this->client = new Client();
-        // TBC E-Commerce API endpoint per official documentation.
-        $this->tbcEndpoint = config('services.tbc.endpoint'); // e.g. https://checkout.tbcbank.ge/api/checkout/v1/transactions
-        $this->bogEndpoint = config('services.bog.endpoint'); // Update this when BOG details are available.
+        $this->tbcEndpoint = config('services.tbc.endpoint'); // TBC API endpoint
+        $this->bogEndpoint = config('services.bog.endpoint'); // BOG API endpoint (adjust later)
         $this->tbcApiKey   = config('services.tbc.api_key');
-        $this->tbcAppId    = config('services.tbc.app_id');  // Chardin Gallery App ID: 6e86edd7-7231-4322-9f08-6486e24674c1
+        $this->tbcAppId    = config('services.tbc.app_id'); // Chardin Gallery App ID
         $this->bogApiKey   = config('services.bog.api_key');
     }
 
@@ -50,12 +50,10 @@ class PaymentService
      */
     protected function chargeTBC(array $paymentData): array
     {
-        // Build the payload following TBC's documentation.
-        // Note: Amount must be provided in the smallest currency unit (e.g. GEL amount * 100).
         $payload = [
             'order' => [
                 'orderId'     => $paymentData['order_id'],
-                'amount'      => $paymentData['amount'] * 100,
+                'amount'      => $paymentData['amount'] * 100, // Amount in smallest currency unit (e.g., GEL * 100)
                 'currency'    => $paymentData['currency'] ?? 'GEL',
                 'description' => $paymentData['description'] ?? 'Payment for Order ' . $paymentData['order_id'],
             ],
@@ -67,28 +65,36 @@ class PaymentService
                 'email' => $paymentData['customer_email'] ?? '',
                 'phone' => $paymentData['customer_phone'] ?? '',
             ],
-            // Additional fields can be added here if required.
         ];
 
         try {
+            // Guzzle HTTP request to TBC API
             $response = $this->client->post($this->tbcEndpoint, [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $this->tbcApiKey,
-                    'X-App-Id'      => $this->tbcAppId, // Include the Chardin Gallery App ID
+                    'X-App-Id'      => $this->tbcAppId,
                     'Content-Type'  => 'application/json',
                     'Accept'        => 'application/json',
                 ],
                 'json' => $payload,
+                'curl' => [
+                    CURLOPT_SSLVERSION => CURL_SSLVERSION_TLSv1_2, // Force TLS 1.2 or TLS 1.3 for secure communication
+                    CURLOPT_SSL_VERIFYHOST => 2, // Ensure SSL verification
+                    CURLOPT_SSL_VERIFYPEER => true, // Enable SSL peer verification
+                ]
             ]);
 
             $result = json_decode($response->getBody(), true);
 
-            // A successful response includes a 'paymentLink' to which the customer should be redirected.
             if (isset($result['paymentLink']) && $result['paymentLink']) {
                 return $result;
             } else {
                 throw new Exception('TBC Payment failed: ' . ($result['message'] ?? 'Unknown error'));
             }
+        } catch (RequestException $e) {
+            $response = $e->getResponse();
+            $message = $response ? $response->getBody()->getContents() : $e->getMessage();
+            throw new Exception('TBC Payment Exception: ' . $message);
         } catch (Exception $e) {
             throw new Exception('TBC Payment Exception: ' . $e->getMessage());
         }
@@ -111,10 +117,10 @@ class PaymentService
                 'successUrl' => $paymentData['success_url'],
                 'failUrl'    => $paymentData['fail_url'],
             ],
-            // Additional fields for BOG can be added here.
         ];
 
         try {
+            // Guzzle HTTP request to BOG API
             $response = $this->client->post($this->bogEndpoint, [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $this->bogApiKey,
@@ -131,6 +137,10 @@ class PaymentService
             } else {
                 throw new Exception('BOG Payment failed: ' . ($result['message'] ?? 'Unknown error'));
             }
+        } catch (RequestException $e) {
+            $response = $e->getResponse();
+            $message = $response ? $response->getBody()->getContents() : $e->getMessage();
+            throw new Exception('BOG Payment Exception: ' . $message);
         } catch (Exception $e) {
             throw new Exception('BOG Payment Exception: ' . $e->getMessage());
         }
