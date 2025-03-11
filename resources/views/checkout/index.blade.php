@@ -59,12 +59,31 @@
 
                 <!-- Payment Section -->
                 <div class="mt-8">
-                    <h3 class="text-lg font-semibold mb-4">Payment Details</h3>
-                    <div id="card-element" class="border rounded-lg p-3"></div>
-                    <button type="submit" form="checkout-form"
-                        class="w-full bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-smooth mt-6">
-                        Complete Purchase
-                    </button>
+                    <h3 class="text-lg font-semibold mb-4">Payment Method</h3>
+
+                    <form id="checkout-form" action="{{ route('checkout.process') }}" method="POST">
+                        @csrf
+
+                        <!-- Payment Method Selection -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Select Payment Method</label>
+                            <select name="payment_method" id="payment-method" required
+                                class="w-full rounded-md border-gray-300 focus:border-black focus:ring-black">
+                                <option value="tbc">TBC Bank</option>
+                            </select>
+                        </div>
+
+                        <!-- Hidden Inputs -->
+                        <input type="hidden" name="amount" value="{{ $cartTotal }}">
+                        <input type="hidden" name="email" value="{{ auth()->user()->email }}">
+                        <input type="hidden" name="name" value="{{ auth()->user()->name }}">
+                        <input type="hidden" name="shipping_address" value="{{ old('shipping_address') }}">
+
+                        <button type="submit"
+                            class="w-full bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-smooth mt-6">
+                            Proceed to Payment
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

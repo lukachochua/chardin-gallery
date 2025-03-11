@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Services\CartService;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class CheckoutController extends Controller
 {
@@ -29,41 +30,42 @@ class CheckoutController extends Controller
     {
         // Validate the checkout request.
         $request->validate([
-            'payment_method' => 'required|in:tbc,bog',
+            'payment_method' => 'required|in:tbc',
             'amount'         => 'required|numeric|min:0.01',
-            // Add validations for customer details if needed.
         ]);
-    
+
         $paymentMethod = $request->input('payment_method');
-    
-        // Prepare payment data.
+
+        // Prepare payment data
         $paymentData = [
-            'order_id'       => uniqid('order_', true),  // Generate a unique order ID.
+            'order_id'       => uniqid('order_', true),
             'amount'         => $request->input('amount'),
             'currency'       => 'GEL',
             'description'    => 'Payment for Order ' . uniqid(),
             'success_url'    => route('checkout.success'),
             'fail_url'       => route('checkout.cancel'),
-            'customer_email' => $request->input('email', ''),
-            'customer_phone' => $request->input('phone', ''),
+            'customer_email' => $request->input('email'),
+            'customer_phone' => $request->input('phone'),
         ];
-    
+
         $paymentService = new \App\Services\PaymentService();
-    
+
         try {
-            // Create a payment session and get the payment link.
             $paymentResponse = $paymentService->charge($paymentMethod, $paymentData);
-    
+
+            Log::info('TBC Payment Response:', $paymentResponse);
+
             if (isset($paymentResponse['paymentLink'])) {
-                // Redirect the customer to the TBC (or BOG) payment page.
                 return redirect()->away($paymentResponse['paymentLink']);
             } else {
                 throw new \Exception('No payment link provided.');
             }
         } catch (\Exception $e) {
+            Log::error('TBC Payment Error: ' . $e->getMessage());
             return redirect()->route('checkout.cancel')->with('error', $e->getMessage());
         }
     }
+
 
 
     public function success(Order $order)

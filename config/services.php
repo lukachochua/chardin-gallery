@@ -37,8 +37,9 @@ return [
 
     'tbc' => [
         'endpoint' => env('TBC_ENDPOINT', 'https://checkout.tbcbank.ge/api/checkout/v1/transactions'),
-        'api_key'  => env('TBC_API_KEY', '52cN0JRKWtG4hjYMFWd2Ahsv7bOXGzOE'),
-        'app_id'   => env('TBC_APP_ID', '6e86edd7-7231-4322-9f08-6486e24674c1'),
+        'api_key'  => env('TBC_API_KEY'),
+        'app_id'   => env('TBC_APP_ID'),
+        'sandbox'  => env('TBC_SANDBOX', true), // Enable sandbox mode
     ],
 
     'bog' => [
